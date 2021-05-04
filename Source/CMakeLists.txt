@@ -32,6 +32,8 @@ option(PROTOCOLS
         "Include the protocols library." ON)
 option(TRACING
         "Include the tracing library." ON)
+option(TRACING_DIRECT_OUTPUT
+        "Enable direct output for tracing." OFF)
 option(PROFILER
         "Include the profiler library." OFF)
 option(COM
@@ -109,6 +111,10 @@ if(TEST_MEASUREMENTS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_EXE_LINKER_FLAGS -lgcov)
 endif ()
+
+if(TRACING_DIRECT_OUTPUT)
+    SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DTRACING_DIRECT_OUTPUT")
+endif()
 
 if(CORE)
     add_subdirectory(core)
