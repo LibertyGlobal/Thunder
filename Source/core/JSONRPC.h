@@ -705,8 +705,6 @@ namespace Core {
             {
                 HandlerMap::iterator index = _handlers.find(methodName);
 
-                ASSERT((index != _handlers.end()) && _T("Do not unregister methods that are not registered!!!"));
-
                 if (index != _handlers.end()) {
                     _handlers.erase(index);
                 }
