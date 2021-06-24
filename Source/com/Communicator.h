@@ -850,10 +850,14 @@ namespace RPC {
 
                     std::list<RPC::IRemoteConnection::INotification*>::iterator observer(_observers.begin());
 
+                    TRACE_L1("Connection is closed _parent.Closed");
+                    _parent.Closed(destructed);
+                    TRACE_L1("Notify observers that connection is closed start");
                     while (observer != _observers.end()) {
                         (*observer)->Deactivated(index->second);
                         observer++;
                     }
+                    TRACE_L1("Notify observers that connection is closed end");
 
                     // Don't forget to close on our side as well, if it is not already closed....
                     index->second->Terminate();
@@ -862,8 +866,6 @@ namespace RPC {
                     index->second->Release();
                     _connections.erase(index);
                     _adminLock.Unlock();
-
-                    _parent.Closed(destructed);
 
                     connection->Release();
                 }
