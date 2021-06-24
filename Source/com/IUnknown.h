@@ -285,6 +285,13 @@ namespace ProxyStub {
 
             return (result);
         }
+
+        inline void Incomplete(const void * impl, uint32_t id)
+        {
+            TRACE_L1("Incomplete invoked for ptr=%p interfaceId=%u", impl, id);
+            RPC::Administrator::Instance().Release(_channel, (void *)impl, id, 1);
+        }
+
         inline void Complete(RPC::Data::Frame::Reader& reader) const
         {
             while (reader.HasData() == true) {
@@ -411,6 +418,12 @@ namespace ProxyStub {
             RPC::Administrator::Instance().ProxyInstance(_unknown.Channel(),implementation,true,id,result);
             return (result);
         }
+
+        inline void Incomplete(const void * impl, uint32_t id)
+        {
+            _unknown.Incomplete(impl, id);
+        }
+
         inline void Complete(RPC::Data::Frame::Reader& reader) const
         {
             return (_unknown.Complete(reader));

@@ -1150,6 +1150,15 @@ def GenerateStubs(output_file, source_file, includePaths = [], defaults="", scan
                         emit.IndentDec()
                         emit.Line("}")
 
+                    if proxy_params > 0:
+                        emit.Line("else {")
+                        for c, p in enumerate(params):
+                            if p.is_ptr and p.obj and p.proxy:
+                                emit.IndentInc()
+                                emit.Line("Incomplete(param%i, %s::ID);" % (c, p.str_typename))
+                                emit.IndentDec()
+                        emit.Line("}")
+
                     if EMIT_TRACES:
                         emit.Line()
                         emit.Line('fprintf(stderr, "*** [%s proxy] EXIT: %s()\\n");' % (iface.obj.full_name, m.name))
