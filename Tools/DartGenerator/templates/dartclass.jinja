@@ -1,19 +1,19 @@
-# If not stated otherwise in this file or this component's LICENSE file the
-# following copyright and licenses apply:
-#
-# Copyright 2022 Liberty Global Service B.V.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+// If not stated otherwise in this file or this component's LICENSE file the
+// following copyright and licenses apply:
+//
+// Copyright 2022 Liberty Global Service B.V.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -81,13 +81,13 @@ class {{api.classname}}
   {% endif %}
 
   {{api.classname}}() {
+    _instanceCount++;
     _socket = WebSocketChannel.connect( Uri.parse('ws://192.168.1.142:9998/jsonrpc'));
     _client = Peer( _socket.cast<String>() );
     _client.listen();
   {% if api.events | length > 0 %}
     _streamController = _createStreamController();
   {% endif %}
-    _instanceCount++;
   }
 
   {% for property in api.properties %}
@@ -124,63 +124,54 @@ class {{api.classname}}
 
   {% endfor %}
 {% if api.events | length > 0 %}
-  final Map<Type, Object Function(Map<String, dynamic>)> _eventTypeToFactoryMap = {
-{%- for e in api.events %} 
-    {{e.arguments[0].type}}: {{api.baseEventName}}.{{e.arguments[0].type}}FromJsonFactory {{ ", " if not loop.last else "" }}
-{%- endfor %}
-  };
-
-  final Map<Type, String> _typeToNameMap = {
-{%- for e in api.events %} 
-    {{e.arguments[0].type}}: '{{e.name}}' {{ ", " if not loop.last else "" }}
-{%- endfor %}
-};
 
   /// Creates the stream controller for the class events: {% for e in api.events -%} `{{e.arguments[0].type}}`{{ ", " if not loop.last else "" }} {%- endfor %}
   StreamController<{{api.baseEventName}}> _createStreamController() {
-    //final eventName = _typeToNameMap[T]!;
-    //final eventId = "${T.toString()}${_instanceCount}";
-    //print("eventid: $eventId");
-    //void _onListen() {
-    //  _client.sendRequest('{{api.name}}.1.register', {'event': eventName, 'id': eventId}).then((value) => print('onlisten: $value'));
-    //}
+    void _onListen() {
+      String eventId, eventName;
+{%- for e in api.events %}
+      eventId = "{{e.arguments[0].type}}{{ "${" }}_instanceCount{{ "}" }}";
+      eventName = "{{e.name}}";
+      print("eventId ${eventId}");
+      _client.sendRequest('{{api.name}}.1.register', {'event': "{{e.name}}", 'id': eventId}).then((value) => print('onlisten: $value'));
+{%- endfor %}
+    }
 
-    //void _onCancel() {
-    //  _client.sendRequest('{{api.name}}.1.unregister', {'event': eventName, 'id': eventId});
-    //}
+    void _onCancel() {
+      String eventId, eventName;
+{%- for e in api.events %} 
+      eventId = "{{e.arguments[0].type}}{{ "${" }}_instanceCount{{ "}" }}";
+      eventName = "{{e.name}}";
+      print("eventId listen ${eventId}");
+      _client.sendRequest('{{api.name}}.1.unregister', {'event': eventName, 'id': eventId}).then((value) => print('onlisten: $value'));
+{%- endfor %}
+    }
 
     final streamController = StreamController<{{api.baseEventName}}>.broadcast(
-    //  onListen: _onListen,
-    //  onCancel: _onCancel,
+      onListen: _onListen,
+      onCancel: _onCancel,
     );
+
+      String eventId, eventName;
+{%- for e in api.events %} 
+      eventId = "{{e.arguments[0].type}}{{ "${" }}_instanceCount{{ "}" }}";
+      eventName = "{{e.name}}";
+      print("eventId register: ${eventId}");
+    _client.registerMethod(
+      "${eventId}.${eventName}",
+      (Parameters data) {
+        final response = data.value;
+        streamController.add({{api.baseEventName}}.{{e.arguments[0].type}}FromJsonFactory(response) as {{api.baseEventName}});
+      }
+    );
+{%- endfor %}
 
     return streamController;
   }
 
   Stream<{{api.baseEventName}}> get stream {
-    return _getStreamController().stream;
+    return _streamController.stream;
   }
 
-  StreamController<{{api.baseEventName}}> _getStreamController(){
-    print("_getStreamController ${_streamController}");
-    //if (_streamController == null) {
-    //}
-    return _streamController;
-  }
-
-  void subscribe<T>() {
-    final eventName = _typeToNameMap[T]!;
-    final eventId = "${T.toString()}${_instanceCount}";
-    print("eventid: $eventId");
-    _client.sendRequest('{{api.name}}.1.register', {'event': eventName, 'id': eventId}).then((value) => print('onlisten: $value'));
-
-    _client.registerMethod(
-      '$eventId.$eventName',
-      (Parameters data) {
-        final response = data.value;
-        _streamController.add(_eventTypeToFactoryMap[T]!(response) as {{api.baseEventName}});
-      },
-    );
-  }
 {% endif %}
 }

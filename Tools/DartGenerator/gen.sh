@@ -8,14 +8,17 @@ mkdir -p $outdir/lib/src
 cp pubspec-onemw_api.yaml $outdir/pubspec.yaml 
 cp README-onemw_api.md $outdir/README.md 
 
+RDKSERVICES_ROOT=../../../rdkservices
+
 API_FILES="\
-json-defs/LgiDisplaySettings.json \
-json-defs/LgiHdmiCec.json \
-json-defs/DisplayInfo.json \
-json-defs/ActivityMonitor.json \
-json-defs/PlayerInfo.json \
-json-defs/SecurityAgent.json \
+$RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
+$RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
+$RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
+$RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
+$RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
+$RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
 "
+
 # API_FILES="\
 # json-defs/LgiDisplaySettings.json \
 # json-defs/LgiHdmiCec.json \
@@ -31,6 +34,7 @@ rm -rf $lib_main_file
 for f in `find $outdir/lib/src -name "*.dart" | grep -v "freeze" | grep -v "\.g\." `; do
   echo "export 'src/`basename $f`';" >> $outdir/lib/onemw_api.dart
 done
+# exit
 
 
 pushd $outdir
