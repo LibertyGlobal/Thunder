@@ -1,0 +1,21 @@
+name: onemw_api
+version: 0.0.1
+
+dependencies:
+  json_rpc_2: ^3.0.1
+  web_socket_channel: ^2.1.0
+  freezed: ^1.1.1
+  json_serializable: ^6.1.4
+  json_annotation:   ^4.4.0
+
+dev_dependencies:
+  json_rpc_2: ^3.0.1
+  web_socket_channel: ^2.1.0
+  freezed: ^1.1.1
+  freezed_annotation: ^1.1.0
+  json_serializable: ^6.1.4
+  build_runner:
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+

@@ -1,0 +1,5 @@
+sample-app/.dart_tool/
+sample-app/.packages
+sample-app/pubspec.lock
+onemw_api/
+.*.swp

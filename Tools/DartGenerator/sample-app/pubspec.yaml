@@ -1,0 +1,11 @@
+name: testapp
+dependencies:
+  json_rpc_2: ^3.0.1
+  web_socket_channel: ^2.1.0
+  onemw_api:
+    path: ../onemw_api
+    version: ^0.0.1
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+

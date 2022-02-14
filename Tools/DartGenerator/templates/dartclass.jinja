@@ -1,0 +1,186 @@
+# If not stated otherwise in this file or this component's LICENSE file the
+# following copyright and licenses apply:
+#
+# Copyright 2022 Liberty Global Service B.V.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
+import 'dart:async';
+import 'dart:io';
+
+{% if api.events | length > 0 %}
+part '{{api.filename}}.g.dart';
+part '{{api.filename}}.freezed.dart';
+{% endif %}
+
+{% for s in api.structs -%}
+  {% if s.doc -%}
+  /// {{s.doc}}
+  {% endif -%}
+  {% if s.json_serializable -%}
+  @JsonSerializable()
+  {% endif -%}
+  class {{s.structConvertedName()}} { //{{s.struct_name}} {{s.usage}}
+    //xxrp:{{s.required_properties}}
+{% for p in s.properties -%}
+    ///{{p.doc}}
+    final {{p.type}}{{"" if s.required_properties and p.name in s.required_properties else "?"}} {{ p.name }};
+{% endfor %}
+    {{s.structConvertedName()}}({{s.properties|struct_ctor_args}});
+    {{s.structConvertedName()}}.fromMap(map):this({{s.properties|struct_ctor_args_from_map}});
+  {% if s.json_serializable -%}
+    String toJson() { return ''; }
+  {% endif -%}
+}
+{% if s.json_serializable -%}
+{{s.structConvertedName()}} {{s.json_serializable_from_json}}(Map<String, dynamic> json) => _${{s.structConvertedName()}}FromJson(json);
+{% endif -%}
+{% endfor %}
+
+{% if api.events | length > 0 %}
+@freezed
+class {{api.baseEventName}} with _${{api.baseEventName}}{
+    @JsonSerializable(explicitToJson: true)
+{% for e in api.events %} 
+    factory {{api.baseEventName}}.{{e.arguments[0].type}}Factory({{e.arguments[0].type.getFreezeCtorArgs()}}) = {{e.arguments[0].type}};
+{% endfor %}
+
+    factory {{api.baseEventName}}.fromJson(Map<String, dynamic> json) => _${{api.baseEventName}}FromJson(json);
+    static const fromJsonFactory = _${{api.baseEventName}}FromJson;
+{% for e in api.events %} 
+    static const {{e.arguments[0].type}}FromJsonFactory = _$${{e.arguments[0].type}}FromJson;
+{% endfor %}
+}
+{% endif %}
+
+/// {{api.doc}}
+{% if api.events | length > 0 %}
+/// This API emits following events {% for e in api.events -%} `{{e.arguments[0].type}}`{{ ", " if not loop.last else "" }} {%- endfor -%}
+{% endif %}
+class {{api.classname}}
+{
+  late Peer _client;
+  late WebSocketChannel _socket;
+  static int _instanceCount = 0;
+
+  {% if api.events | length > 0 %}
+  late StreamController<{{api.baseEventName}}> _streamController;
+  {% endif %}
+
+  {{api.classname}}() {
+    _socket = WebSocketChannel.connect( Uri.parse('ws://192.168.1.142:9998/jsonrpc'));
+    _client = Peer( _socket.cast<String>() );
+    _client.listen();
+  {% if api.events | length > 0 %}
+    _streamController = _createStreamController();
+  {% endif %}
+    _instanceCount++;
+  }
+
+  {% for property in api.properties %}
+  /// {{property.doc}}
+  Future<{{property.type}}> {{property.name}}Property () async {
+    var result = await _client.sendRequest('{{property.callsign}}');
+
+    print(result);
+    return {{property.type.instanceResultCreationCode('result')}};
+  }
+  {% endfor %}
+
+  {% for method in api.methods %}
+  /// {{method.doc}}
+  {% if method.arguments | selectattr("doc") | any  -%}
+  ///
+  {% for a in method.arguments -%}
+  /// [{{a.name}}] {{a.doc}}
+  {% endfor -%}
+  {% endif -%}
+  {% if method.result.doc -%}
+  /// @result {{method.result.doc}}
+  {% endif -%}
+
+  Future<{{method.result.rtype}}> {{method.name}} ({{ method.arguments | method_args }}) async {
+    var result = await _client.sendRequest('{{method.callsign}}');
+
+    print(result);
+    if (result["success"] as bool == true) {
+      return {{method.result.rtype.instanceResultCreationCode('result')}};
+    }
+    return Future.error("Request failure");
+  }
+
+  {% endfor %}
+{% if api.events | length > 0 %}
+  final Map<Type, Object Function(Map<String, dynamic>)> _eventTypeToFactoryMap = {
+{%- for e in api.events %} 
+    {{e.arguments[0].type}}: {{api.baseEventName}}.{{e.arguments[0].type}}FromJsonFactory {{ ", " if not loop.last else "" }}
+{%- endfor %}
+  };
+
+  final Map<Type, String> _typeToNameMap = {
+{%- for e in api.events %} 
+    {{e.arguments[0].type}}: '{{e.name}}' {{ ", " if not loop.last else "" }}
+{%- endfor %}
+};
+
+  /// Creates the stream controller for the class events: {% for e in api.events -%} `{{e.arguments[0].type}}`{{ ", " if not loop.last else "" }} {%- endfor %}
+  StreamController<{{api.baseEventName}}> _createStreamController() {
+    //final eventName = _typeToNameMap[T]!;
+    //final eventId = "${T.toString()}${_instanceCount}";
+    //print("eventid: $eventId");
+    //void _onListen() {
+    //  _client.sendRequest('{{api.name}}.1.register', {'event': eventName, 'id': eventId}).then((value) => print('onlisten: $value'));
+    //}
+
+    //void _onCancel() {
+    //  _client.sendRequest('{{api.name}}.1.unregister', {'event': eventName, 'id': eventId});
+    //}
+
+    final streamController = StreamController<{{api.baseEventName}}>.broadcast(
+    //  onListen: _onListen,
+    //  onCancel: _onCancel,
+    );
+
+    return streamController;
+  }
+
+  Stream<{{api.baseEventName}}> get stream {
+    return _getStreamController().stream;
+  }
+
+  StreamController<{{api.baseEventName}}> _getStreamController(){
+    print("_getStreamController ${_streamController}");
+    //if (_streamController == null) {
+    //}
+    return _streamController;
+  }
+
+  void subscribe<T>() {
+    final eventName = _typeToNameMap[T]!;
+    final eventId = "${T.toString()}${_instanceCount}";
+    print("eventid: $eventId");
+    _client.sendRequest('{{api.name}}.1.register', {'event': eventName, 'id': eventId}).then((value) => print('onlisten: $value'));
+
+    _client.registerMethod(
+      '$eventId.$eventName',
+      (Parameters data) {
+        final response = data.value;
+        _streamController.add(_eventTypeToFactoryMap[T]!(response) as {{api.baseEventName}});
+      },
+    );
+  }
+{% endif %}
+}

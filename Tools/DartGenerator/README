@@ -1,0 +1,12 @@
+# rdkservices dart generator
+
+This tool generates the rdkservices API library in dart language.
+
+# usage
+`jsonrpc_to_dart.py`  is a generator which transforms the file with jsonrpc2
+defintion into the dart file.
+
+The `gen.sh script` runs the generator for each json file from `API_FILES`
+list and generates the package in the directory pointed by `outdir` variable.
+
+Currently both variables are hardcoded in gen.sh script.
