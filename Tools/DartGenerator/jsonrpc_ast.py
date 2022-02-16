@@ -26,7 +26,7 @@ class VoidType:
         return "void"
 
     def instanceResultCreationCode(self, result=None):
-        return "/*void*/"
+        return ""
 
 class SimpleType(object):
     def __init__(self, simple_type):
@@ -45,8 +45,8 @@ class SimpleType(object):
         dartmap = {
            "boolean":f"{result} as bool",
            "integer":f"{result} is int ? {result} : int.parse({result})",
-           "string":f"{result}",
-           "number":f"double.parse({result})",
+           "string":f"{result} as String",
+           "number":f"{result} is double ? {result} : double.parse({result})",
         }
         return dartmap[self.simple_type]
 
@@ -305,6 +305,9 @@ class Method:
         if type(self.result.rtype) is StructType:
             self.result.rtype.makeResult()
 
+def method_args_verbose(args):
+    return ", ".join(["${" + f"{str(a.name)}" + "}" for a in args])
+
 def method_args(args):
     return ", ".join([f"{str(a.type)} {str(a.name)}" for a in args])
 
@@ -348,6 +351,7 @@ class APIClass:
         env = Environment(loader=file_loader)
         env.filters['any'] = any
         env.filters['method_args'] = method_args
+        env.filters['method_args_verbose'] = method_args_verbose
         env.filters['struct_ctor_args'] = struct_ctor_args
         env.filters['struct_ctor_args_from_map'] = struct_ctor_args_from_map
 

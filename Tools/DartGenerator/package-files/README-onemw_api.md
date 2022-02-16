@@ -1,0 +1,72 @@
+## onemw-api
+This package provides bindings for thunder/rdkservices API. The classes within the package are automatically generated
+from the API definition files.
+
+## Main classes
+Following API classes are the entry points for using the OneMW API:
+- [DisplaySettings]
+- [LgiHdmiCec]
+- [DisplayInfo]
+- [ActivityMonitor]
+- [PlayerInfo]
+- [SecurityAgent]
+- [XCast]
+
+## Eventing
+Each API class provides a `stream` which allows to listen for API specific events.
+```
+  var api = DisplaySettings();
+  ds_api.stream.listen((event) {print ('event: ${event}');});
+```
+
+The list of events emitted by each API class is provided in the documentation of the class.
+
+
+## Debugging
+There is a verbose flag to enable debug info from API class. Error reports shall include verbose logs.
+```
+  var api = DisplaySettings();
+  api.verbose = True;
+```
+
+Each API class defines its own base event, the API specific events inherit from this class. Events are classes generated
+by [freezed](https://pub.dev/packages/freezed) module, meaning they have all freeze-generated convenience methods (e.g. `map`, `when`, `maybeMap`, `maybeWhen`).
+
+## Environment
+The library respects the `CPE_HOST` environment variable, which may contain the IP address of CPE device. This allows to
+use the library on the PC host and connect to the remote CPE device.
+
+
+## Using API
+```dart
+import 'package:onemw_api/onemw_api.dart';
+
+void main() async {
+  var ds_api = DisplaySettings();
+  var di_api = DisplayInfo();
+
+  di_api.verbose = true;
+  print("di out hdcpprotectionProperty: ${await di_api.hdcpprotectionProperty()}");
+
+  print("ds out: ${await ds_api.getConnectedAudioPorts()}");
+  print("ds out: ${await ds_api.getVolumeLevel("HDMI0")}");
+  print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
+  print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
+  print("ds out: ${await ds_api.getDefaultResolution()}");
+
+  ds_api.stream.listen((event) {print ('event: ${event}');});
+}
+```
+
+## Definition of the API
+The best effort was made to document the dart classes. The original API definition in json files is provided here for reference:
+ * [DisplaySettings.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiDisplaySettings/LgiDisplaySettings.json)
+ * [LgiHdmiCec.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdmiCec/LgiHdmiCec.json)
+ * [DisplayInfo.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/DisplayInfo/DisplayInfo.json)
+ * [ActivityMonitor.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/ActivityMonitor/ActivityMonitor.json)
+ * [PlayerInfo.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/PlayerInfo/PlayerInfo.json)
+ * [SecurityAgent.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/SecurityAgent/SecurityAgent.json)
+ * [XCast.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/XCast/XCast.json)
+
+
+

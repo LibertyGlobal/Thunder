@@ -26,6 +26,8 @@ int f(var x) {
 void main() async {
   var ds_api = DisplaySettings();
   var di_api = DisplayInfo();
+  // ds_api.verbose = true;
+  // di_api.verbose = true;
   print("di out hdcpprotectionPr: ${await di_api.hdcpprotectionProperty()}");
   print("di out hdrsettingProper: ${await di_api.hdrsettingProperty()}");
   print("di out heightProperty(): ${await di_api.heightProperty()}");
@@ -38,10 +40,9 @@ void main() async {
 
 
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
-  print("ds out: ${await ds_api.getConnectedAudioPorts()}");
   print("ds out: ${await ds_api.getVolumeLevel("HDMI0")}");
-  print("ds out: ${await ds_api.getTvHDRSupport()}.standards");
-  print("ds out: ${await ds_api.getTvHDRSupport()}.supportsHDR");
+  print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
+  print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
   print("ds out: ${await ds_api.getDefaultResolution()}");
 
   ds_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
