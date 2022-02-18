@@ -45,11 +45,15 @@ $RDKSERVICES_ROOT/XCast/XCast.json \
 
 for i in $API_FILES; do 
   echo $i
-  corefilename=`basename -s .json $i`.dart
-  dartfilename=`CamelCase_to_snake_case $corefilename`
-  dartfilepath=$outdir/lib/src/${dartfilename}
-  python3 jsonrpc_to_dart.py -i $i -o  ${dartfilepath}
-  dart format -l 120 ${dartfilepath}
+  if [ -f $i ]; then
+    corefilename=`basename -s .json $i`.dart
+    dartfilename=`CamelCase_to_snake_case $corefilename`
+    dartfilepath=$outdir/lib/src/${dartfilename}
+    python3 jsonrpc_to_dart.py -i $i -o  ${dartfilepath}
+    dart format -l 120 ${dartfilepath}
+  else
+    echo "$i does not exists..."
+  fi
 done 
 
 rm -rf $lib_main_file

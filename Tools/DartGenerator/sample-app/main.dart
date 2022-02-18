@@ -26,6 +26,9 @@ int f(var x) {
 void main() async {
   var ds_api = DisplaySettings();
   var di_api = DisplayInfo();
+  var cc_api = HdmiCec();
+  cc_api.verbose = true;
+
   // ds_api.verbose = true;
   // di_api.verbose = true;
   print("di out hdcpprotectionPr: ${await di_api.hdcpprotectionProperty()}");
@@ -39,12 +42,17 @@ void main() async {
 
 
 
+  ds_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
+
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
   print("ds out: ${await ds_api.getVolumeLevel("HDMI0")}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
+  print("ds out: ${(await ds_api.getTvHDRSupport())}");
   print("ds out: ${await ds_api.getDefaultResolution()}");
 
-  ds_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
+  print("cc out: ${await cc_api.getCECAddresses()}");
+  print("cc out: ${await cc_api.getEnabled()}");
+  print("cc out: ${await cc_api.getConnectedDevices()}");
 }
 

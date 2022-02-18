@@ -23,6 +23,9 @@ class VoidType:
         pass
 
     def __str__(self):
+        return "VoidType: void"
+
+    def typename(self):
         return "void"
 
     def instanceResultCreationCode(self, result=None):
@@ -33,6 +36,15 @@ class SimpleType(object):
         self.simple_type = simple_type
 
     def __str__(self):
+        dartmap = {
+           "boolean":"bool",
+           "integer":"int",
+           "string":"String",
+           "number":"double",
+        }
+        return f"SimpleType: {dartmap[self.simple_type]}"
+
+    def typename(self):
         dartmap = {
            "boolean":"bool",
            "integer":"int",
@@ -56,10 +68,13 @@ class ArrayType:
         pass
 
     def __str__(self):
-        return f"List<{self.item_type}>"
+        return f"ArrayType: List<{self.item_type}>"
+
+    def typename(self):
+        return f"List<{self.item_type.typename()}>"
 
     def remapDynamicListCode(self, dynamic_list):
-        return f"({dynamic_list} as List).map( (item) => item as {self.item_type} ).toList()"
+        return f"({dynamic_list} as List).map( (item) => item as {self.item_type.typename()} ).toList()"
 
     def instanceResultCreationCode(self, result=None):
         return self.remapDynamicListCode(result)
@@ -103,6 +118,9 @@ class StructProperty:
             return self.type.remapDynamicListCode(f"{mapName}['{self.name}']")
         return f"{mapName}['{self.name}']"
 
+    def __str__(self):
+        return f"StructProperty:( name: {self.name} type:{self.type} )"
+
 class StructType:
     registered_struct_types = {}
     duplicated_struct_types = {}
@@ -126,7 +144,7 @@ class StructType:
         #todo duplication
         if not defined_type:
             if struct_name in StructType.registered_struct_types:
-                print(f"fuckup: {struct_name} / cleanup needed")
+                print(f"warning: duplicated type name: {struct_name} / deep comparison needed")
                 self.struct_name += str(StructType.duplicated_struct_types[struct_name] )
 
             # assert struct_name not in StructType.registered_struct_types
@@ -141,6 +159,8 @@ class StructType:
 
         #do reduction here:
         self.reduced_type, self.reduced_property_field_name = reduceType(self)
+
+        # print(f"makeResult: {self.struct_name} reduction: {type(self.reduced_type)} {self.reduced_type.struct_name if type(self.reduced_type) is StructType else ''} {self.reduced_property_field_name}")
 
     def makeArg(self):
         self.usage = StructTypeUsage.ARG
@@ -178,8 +198,14 @@ class StructType:
 
     def structConvertedName(self):
         # return self.struct_name
+
         is_result = False
         converted_name = self.struct_name
+
+        if converted_name.endswith('_array_struct'):
+            converted_name = converted_name[:-13]
+            converted_name += "Item"
+
         if converted_name.endswith('_reduced'):
             converted_name = converted_name[:-8]
 
@@ -195,38 +221,42 @@ class StructType:
         if self.usage == StructTypeUsage.RESULT:
             if converted_name.startswith('get'):
                 converted_name = converted_name[3:]
+            if converted_name.startswith('is'):
+                converted_name = converted_name[2:]
 
             converted_name += "Result"
 
         return converted_name[0].upper() + converted_name[1:]
 
     def __str__(self):
-        if self.reduced_type:
-            return str(self.reduced_type)
-        return f"{self.structConvertedName()}"
+        return f"StructType:(name: {self.struct_name} converted_name:{self.structConvertedName()} reduced_type: {self.reduced_type} rpfn: {self.reduced_property_field_name} u: {self.usage} " + \
+                f"props:[{[str(p) for p in self.properties]}({len(self.properties)})])"
 
+    def typename(self):
+        if self.reduced_type:
+            return self.reduced_type.typename()
+        return f"{self.structConvertedName()}"
 
     def instanceResultCreationCode(self, result=None):
         #return HdcpProfile.fromJson(result[{self.result.rtype.reduced_property_field_name}]);
+        # print(f"instanceResultCreationCode: {result}");
         if self.reduced_property_field_name:
             assert self.reduced_type
+            # print(f"instanceResultCreationCode {self.reduced_property_field_name}")
             return self.reduced_type.instanceResultCreationCode(f"{result}['{self.reduced_property_field_name}']")
         elif self.reduced_type:
             return self.reduced_type.instanceResultCreationCode(result)
         else:
             # args = [f"result{rf}['{str(p.name)}']" for p in self.properties]
             # return f"{self}.fromMap({', '.join(args)})"
-            return f"{self}.fromMap(result)"
+            return f"{self.typename()}.fromJson({result})"
 
-    def getFreezeCtorArgs(self):
+    def getCtorArgs(self):
         assert self.usage == StructTypeUsage.EVENT
         ctor_args = []
         for p in self.properties:
             o = '' if self.required_properties and p.name in self.required_properties else '?'
-            json_key = ''
-            if type(p.type) is StructType and p.type.json_serializable:
-                json_key = f"@JsonKey(fromJson: {p.type.json_serializable_from_json}, toJson: null)"
-            ctor_args.append(f"{json_key}{str(p.type)+o} {str(p.name)}")
+            ctor_args.append(f"{str(p.type)+o} {str(p.name)}")
 
         return ", ".join(ctor_args)
 
@@ -236,10 +266,16 @@ class MethodArgument:
         self.type = atype
         self.doc = doc
 
+    def __str__(self):
+        return f"MethodArgument:( name: {self.name} type:{self.type} )"
+
 class MethodResult:
     def __init__(self, rtype, doc):
         self.rtype = rtype
         self.doc = doc
+
+    def __str__(self):
+        return f"MethodResult:( type:{self.type} )"
 
 # api property
 class Property:
@@ -256,6 +292,9 @@ class Property:
             argument.type.makeEventArg()
         self.arguments.append(argument)
 
+    def __str__(self):
+        return f"Property:(name: {self.name}/{self.callsign} type: {self.type} arguments:[ {[str(a) for a in self.arguments]}({len(self.arguments)})  ])"
+
 class Event:
     def __init__(self, name, doc):
         self.name = name
@@ -263,21 +302,28 @@ class Event:
         self.arguments = []
 
     def markJsonSerializableProperties(self):
-        print(">>>>> markJsonSerializableProperties ", self.name);
+        # print(">>>>> markJsonSerializableProperties ", self.name);
         ctor_args = []
         assert len(self.arguments) == 1
         if type(self.arguments[0].type) is StructType:
-            print(">>>>> markJsonSerializableProperties ", 1)
+            # print(">>>>> markJsonSerializableProperties ", 1)
             for p in self.arguments[0].type.properties:
                 if type(p.type) is StructType:
-                    print(">>>>> markJsonSerializableProperties ", p.type);
+                    # print(">>>>> markJsonSerializableProperties ", p.type);
                     p.type.setJsonSerializable(True)
+                if type(p.type) is ArrayType:
+                    if type(p.type.item_type) is StructType:
+                        p.type.item_type.setJsonSerializable(True)
+
 
     def addEventArgument(self, argument):
         assert type(argument)is MethodArgument
         if type(argument.type) is StructType:
             argument.type.makeEventArg()
         self.arguments.append(argument)
+
+    def __str__(self):
+        return f"Event:(name: {self.name} arguments:[ {[str(a) for a in self.arguments]}({len(self.arguments)})  ])"
 
 class Method:
     def __init__(self, name, callsign, doc):
@@ -305,11 +351,14 @@ class Method:
         if type(self.result.rtype) is StructType:
             self.result.rtype.makeResult()
 
+    def __str__(self):
+        return f"method: {self.name}, result: {self.result.rtype} / {self.result.rtype.instanceResultCreationCode('TEST')}"
+
 def method_args_verbose(args):
     return ", ".join(["${" + f"{str(a.name)}" + "}" for a in args])
 
 def method_args(args):
-    return ", ".join([f"{str(a.type)} {str(a.name)}" for a in args])
+    return ", ".join([f"{str(a.type.typename())} {str(a.name)}" for a in args])
 
 def struct_ctor_args(args):
     return ", ".join([f"this.{str(p.name)}" for p in args])
@@ -338,7 +387,7 @@ class APIClass:
     def addProperty(self, property):
         self.properties.append(property)
 
-    def generateCode(self, filename, outfile):
+    def generateCode(self, filename, outfile, show_ast):
         for e in self.events:
             e.markJsonSerializableProperties()
 
@@ -346,6 +395,16 @@ class APIClass:
             if s.usage != StructTypeUsage.EVENT:
                 if not s.reduced_type:
                     self.structs.append(s)
+
+        if show_ast:
+            for s in self.structs:
+                print(f"{s}")
+            for m in self.methods:
+                print(f"{m}")
+            for e in self.events:
+                print(f"{e}")
+            for p in self.properties:
+                print(f"{p}")
 
         file_loader = FileSystemLoader('templates')
         env = Environment(loader=file_loader)

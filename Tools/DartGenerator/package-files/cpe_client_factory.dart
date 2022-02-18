@@ -42,9 +42,9 @@ abstract class CpePlatform {
 class CpeRpcClient {
   late WebSocketChannel _socket;
   late Peer _client;
-  static final Map<CpeRpcService, CpeRpcClient> _cache = <CpeRpcService, CpeRpcClient>{};
+  static final Map<CpeRpcService, CpeRpcClient> _cache = {};
 
-  static final Map<CpeRpcService, String> _rpcServiceUrl = <CpeRpcService, String>{
+  static final Map<CpeRpcService, String> _rpcServiceUrl = {
     CpeRpcService.thunder:      'ws://${CpePlatform.host}:9998/jsonrpc',
     CpeRpcService.rmfstreamer:  'ws://${CpePlatform.host}:9998/jsonrpc',
     CpeRpcService.lgias:        'ws://${CpePlatform.host}:10015'
@@ -57,14 +57,12 @@ class CpeRpcClient {
   }
 
   factory CpeRpcClient(CpeRpcService service) {
-    if (_cache.containsKey(service)) {
-      return _cache[service]!;
-    } else {
+    if (!_cache.containsKey(service)) {
       final url = _rpcServiceUrl[service]!;
       final cpeRpcClient = CpeRpcClient._create(url);
       _cache[service] = cpeRpcClient;
-      return cpeRpcClient;
     }
+    return _cache[service]!;
   }
 
   Peer get client {

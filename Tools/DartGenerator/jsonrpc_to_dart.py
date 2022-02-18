@@ -50,7 +50,7 @@ def handleSimpleType(name, type_description, defined_type=False):
     return SimpleType(type_description['type'])
 
 def handleArray(name, array_description, defined_type=False):
-    print(f"---> array: {array_description['type']} {name} {array_description}")
+    # print(f"---> array: {array_description['type']} {name} {array_description}")
 
     item_type = None
     if 'type' in array_description['items']:
@@ -108,7 +108,7 @@ def handleRefDefinition(name, params):
 
         def_root = def_root[path_item]
 
-    print(f"ref: {g_method_name} {name} {params} {def_name} {path} {def_root}")
+    # print(f"ref: {g_method_name} {name} {params} {def_name} {path} {def_root}")
     def_properties = def_root
 
     assert 'type' in def_properties
@@ -155,7 +155,7 @@ def handleMethodParams(method_name, params_description):
         arguments.append(MethodArgument(name, t, doc))
     else:
         print(f"---> {sys.argv[1]} {method_name}")
-        print(f"no type: {params_description}")
+        print(f"error: no type: {params_description}")
 
     return arguments
 
@@ -163,10 +163,10 @@ def handlePropertyParams(property_name, params_description):
     global g_method_name
     g_method_name = property_name
     argument = None
-    print(f"handlePropertyParams param: ---> {property_name} {params_description}")
+    # print(f"handlePropertyParams param: ---> {property_name} {params_description}")
     if 'type' in params_description:
         param_type = params_description['type'] 
-        print(f"non-object param: ---> {property_name} {params_description}")
+        # print(f"non-object param: ---> {property_name} {params_description}")
         assert param_type in typehandlers.keys()
         name=f"{property_name}Property"
         t = typehandlers[ param_type ](name, params_description)
@@ -178,7 +178,7 @@ def handlePropertyParams(property_name, params_description):
         argument = MethodArgument(name, t, doc)
     else:
         print(f"---> {sys.argv[1]} {property_name} / property")
-        print(f"no type: {params_description}")
+        print(f"error: no type: {params_description}")
 
     return argument
 
@@ -189,7 +189,7 @@ def handleEventParams(event_name, params_description):
     arguments = []
     if 'type' in params_description:
         param_type = params_description['type'] 
-        print(f"non-object param: ---> {event_name} {params_description}")
+        # print(f"non-object param: ---> {event_name} {params_description}")
         assert param_type in typehandlers.keys()
         name=f"{event_name}Event"
         t = typehandlers[ param_type ](name, params_description)
@@ -201,7 +201,7 @@ def handleEventParams(event_name, params_description):
         arguments.append(MethodArgument(name, t, doc))
     else:
         print(f"---> {sys.argv[1]} {event_name} / event")
-        print(f"no type: {params_description}")
+        print(f"error: no type: {params_description}")
 
     return arguments
 
@@ -240,7 +240,7 @@ def handleMethodResult(method_name, result_description):
             # print(f"non-object result_description: {result_description}")
             # print("xxx-result: single-type")
         else:
-            # print(f"xxx-result: object {len(result_description['properties'])} {result_description}")
+            # print(f"xxx-result: {method_name} object {len(result_description['properties'])} {result_description}")
             method_result_doc = result_description['summary'] if 'summary' in result_description else None;
             method_result = MethodResult(handleResultBundleObject(f"{method_name}_result", result_description), method_result_doc)
     elif '$ref' in result_description:
@@ -249,7 +249,7 @@ def handleMethodResult(method_name, result_description):
         method_result = MethodResult(method_result_type, method_result_doc)
     else:
         print(f"---> {g_json_filename} {g_method_name}")
-        print(f"result no type: {result_description}")
+        print(f"error: result no type: {result_description}")
 
     return method_result
 
@@ -309,12 +309,12 @@ def buildProperties(apiclass, wsapi, json_filename, filename):
                 if property_params_description:
                     property_argument = handlePropertyParams(property_name, property_params_description)
                     callsign = apiclass.name+".1."+property_name
-                    print(f"---> {g_json_filename} {property_name} {property_argument.type}")
+                    # print(f"---> {g_json_filename} {property_name} {property_argument.type}")
                     property = Property(property_name, property_argument.type, callsign, property_doc)
                     apiclass.addProperty(property)
             else:
                 print(f"---> {g_json_filename} {property_name}")
-                print(f"property no params: {property_def}")
+                print(f"error: property no params: {property_def}")
 
 def buildAST(wsapi, json_filename, filename):
     # print(f"//---------------------------------------------------------- {program_options.in_file}")
@@ -347,6 +347,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-i','--in', help="file to read json from", action="store", dest='in_file',  default='json-defs/DisplayInfo.json', type=str)
     arg_parser.add_argument('-o','--out', help="file to write generated dart code to", action="store", dest='out_file',  default=None, type=str)
     arg_parser.add_argument('-x', help="do not generate code", action="store_true", dest='skip_generation',  default=False)
+    arg_parser.add_argument('-v', help="show ast items", action="store_true", dest='show_ast',  default=False)
     program_options = arg_parser.parse_args()
 
     wsapi = None
@@ -362,7 +363,7 @@ if __name__ == '__main__':
 
     apiclass = buildAST(wsapi, program_options.in_file, filename)
     if not program_options.skip_generation:
-        apiclass.generateCode(filename, outfile)
+        apiclass.generateCode(filename, outfile, program_options.show_ast)
 
     if program_options.out_file:
         f.close()

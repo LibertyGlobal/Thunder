@@ -19,7 +19,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as jsonrpc2;
 import 'dart:async';
 import 'cpe_client_factory.dart';
 
-{% if api.events | length > 0 %}
+{% if api.structs | length > 0 or api.events | length > 0 %}
 import 'package:freezed_annotation/freezed_annotation.dart';
 part '{{api.filename}}.g.dart';
 part '{{api.filename}}.freezed.dart';
@@ -29,23 +29,29 @@ part '{{api.filename}}.freezed.dart';
   {% if s.doc -%}
   /// {{s.doc}}
   {% endif -%}
-  {% if s.json_serializable -%}
-  @JsonSerializable()
-  {% endif -%}
+  {% if True or s.json_serializable -%}
+  @freezed
+  class {{s.structConvertedName()}} with _${{s.structConvertedName()}} { //{{s.struct_name}} {{s.usage}}
+    //xxrp:{{s.required_properties}}
+    const factory {{s.structConvertedName()}}(
+{% for p in s.properties -%}
+      ///{{p.doc}}
+      {{p.type.typename()}}{{"" if s.required_properties and p.name in s.required_properties else "?"}} {{ p.name }}
+      {{ ", " if not loop.last else "" }}
+{% endfor %}
+    ) = _{{s.structConvertedName()}};
+    factory {{s.structConvertedName()}}.fromJson(Map<String, dynamic> json) => _${{s.structConvertedName()}}FromJson(json);
+  }
+{% else %}
   class {{s.structConvertedName()}} { //{{s.struct_name}} {{s.usage}}
     //xxrp:{{s.required_properties}}
 {% for p in s.properties -%}
     ///{{p.doc}}
-    final {{p.type}}{{"" if s.required_properties and p.name in s.required_properties else "?"}} {{ p.name }};
+    final {{p.type.typename()}}{{"" if s.required_properties and p.name in s.required_properties else "?"}} {{ p.name }};
 {% endfor %}
     {{s.structConvertedName()}}({{s.properties|struct_ctor_args}});
     {{s.structConvertedName()}}.fromMap(map):this({{s.properties|struct_ctor_args_from_map}});
-  {% if s.json_serializable -%}
-    String toJson() { return ''; }
-  {% endif -%}
-}
-{% if s.json_serializable -%}
-{{s.structConvertedName()}} {{s.json_serializable_from_json}}(Map<String, dynamic> json) => _${{s.structConvertedName()}}FromJson(json);
+  }
 {% endif -%}
 {% endfor %}
 
@@ -56,13 +62,19 @@ class {{api.baseEventName}} with _${{api.baseEventName}}{
   {% if e.doc -%}
 /// {{e.doc}}
   {% endif -%}
-    factory {{api.baseEventName}}.{{e.arguments[0].type}}Factory({{e.arguments[0].type.getFreezeCtorArgs()}}) = {{e.arguments[0].type}};
+  factory {{api.baseEventName}}.{{e.arguments[0].type.typename()}}Factory(
+{% for p in e.arguments[0].type.properties -%}
+      ///{{p.doc}}
+      {{p.type.typename()}}{{"" if e.arguments[0].type.required_properties and p.name in e.arguments[0].type.required_properties else "?"}} {{ p.name }}
+      {{ ", " if not loop.last else "" }}
+{% endfor %}
+  ) = {{e.arguments[0].type.typename()}};
 {% endfor %}
 
     factory {{api.baseEventName}}.fromJson(Map<String, dynamic> json) => _${{api.baseEventName}}FromJson(json);
     static const fromJsonFactory = _${{api.baseEventName}}FromJson;
 {% for e in api.events %} 
-    static const {{e.arguments[0].type}}FromJsonFactory = _$${{e.arguments[0].type}}FromJson;
+    static const {{e.arguments[0].type.typename()}}FromJsonFactory = _$${{e.arguments[0].type.typename()}}FromJson;
 {% endfor %}
 }
 {% endif %}
@@ -72,16 +84,16 @@ class {{api.baseEventName}} with _${{api.baseEventName}}{
 ///
 /// This class can emit following events:
 {% for e in api.events %} 
-/// * [{{e.arguments[0].type}}] - {{e.doc}}
+/// * [{{e.arguments[0].type.typename()}}] - {{e.doc}}
 {% endfor %}
 {% endif %}
 class {{api.classname}}
 {
-  jsonrpc2.Peer _client = CpeRpcClient(CpeRpcService.thunder).client;
+  final jsonrpc2.Peer _client = CpeRpcClient(CpeRpcService.thunder).client;
   bool _verbose = false;
 
   {% if api.events | length > 0 %}
-  late StreamController<{{api.baseEventName}}> _streamController;
+  late final StreamController<{{api.baseEventName}}> _streamController;
   static int _instanceCount = 0;
   {% endif %}
 
@@ -99,12 +111,12 @@ class {{api.classname}}
 
   {% for property in api.properties %}
   /// {{property.doc}}
-  Future<{{property.type}}> {{property.name}}Property () async {
+  Future<{{property.type.typename()}}> {{property.name}}Property () async {
     if (_verbose) {
       print("{{property.name}}Property calling: {{property.callsign}}");
     }
 
-    var result = await _client.sendRequest('{{property.callsign}}');
+    final result = await _client.sendRequest('{{property.callsign}}');
 
     if (_verbose) {
       print("{{property.name}}Property result: ${result}");
@@ -125,12 +137,12 @@ class {{api.classname}}
   /// @result {{method.result.doc}}
   {% endif -%}
 
-  Future<{{method.result.rtype}}> {{method.name}} ({{ method.arguments | method_args }}) async {
+  Future<{{method.result.rtype.typename()}}> {{method.name}} ({{ method.arguments | method_args }}) async {
     if (_verbose) {
       print("Calling {{method.name}} / {{method.callsign}} {{method.arguments | method_args_verbose}})");
     }
 
-    var result = await _client.sendRequest('{{method.callsign}}');
+    final result = await _client.sendRequest('{{method.callsign}}');
 
     if (_verbose) {
       print("{{method.name}} result: ${result}");
@@ -145,17 +157,17 @@ class {{api.classname}}
   {% endfor %}
 {% if api.events | length > 0 %}
 
-  /// Creates the stream controller for the class events: {% for e in api.events -%} `{{e.arguments[0].type}}`{{ ", " if not loop.last else "" }} {%- endfor %}
+  /// Creates the stream controller for the class events: {% for e in api.events -%} `{{e.arguments[0].type.typename()}}`{{ ", " if not loop.last else "" }} {%- endfor %}
   StreamController<{{api.baseEventName}}> _createStreamController() {
     void _onListen() {
       String eventId, eventName;
 {%- for e in api.events %}
-      eventId = "{{e.arguments[0].type}}{{ "${" }}_instanceCount{{ "}" }}";
+      eventId = "{{e.arguments[0].type.typename()}}{{ "${" }}_instanceCount{{ "}" }}";
       eventName = "{{e.name}}";
       if (_verbose) {
         print("registering event: eid: ${eventId} ename: ${eventName}");
       }
-      _client.sendRequest('{{api.name}}.1.register', {'event': "{{e.name}}", 'id': eventId}).then(
+      _client.sendRequest('{{api.name}}.1.register', {'event': eventName, 'id': eventId}).then(
         (value) {
           if (_verbose) {
             print('onlisten: $value');
@@ -167,7 +179,7 @@ class {{api.classname}}
     void _onCancel() {
       String eventId, eventName;
 {%- for e in api.events %} 
-      eventId = "{{e.arguments[0].type}}{{ "${" }}_instanceCount{{ "}" }}";
+      eventId = "{{e.arguments[0].type.typename()}}{{ "${" }}_instanceCount{{ "}" }}";
       eventName = "{{e.name}}";
       if (_verbose) {
         print("unregistering event: eid: ${eventId} ename: ${eventName}");
@@ -188,7 +200,7 @@ class {{api.classname}}
 
       String eventId, eventName;
 {%- for e in api.events %} 
-    eventId = "{{e.arguments[0].type}}{{ "${" }}_instanceCount{{ "}" }}";
+    eventId = "{{e.arguments[0].type.typename()}}{{ "${" }}_instanceCount{{ "}" }}";
     eventName = "{{e.name}}";
     if (_verbose) {
       print("registerMehtod for event: ${eventId} ${eventName}");
@@ -200,10 +212,11 @@ class {{api.classname}}
           print("event: ${eventId}.${eventName} ${data}");
         }
         final response = data.value;
-        streamController.add({{api.baseEventName}}.{{e.arguments[0].type}}FromJsonFactory(response));
+        streamController.add({{api.baseEventName}}.{{e.arguments[0].type.typename()}}FromJsonFactory(response));
       }
     );
-{%- endfor %}
+
+{% endfor %}
 
     return streamController;
   }
