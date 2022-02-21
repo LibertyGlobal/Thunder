@@ -107,10 +107,18 @@ def reduceType(intype):
     return VoidType(), None
 
 class StructProperty:
+    # The fix is required for the struct properties that are names exactly the
+    # same as the defined type.
+    naming_workarounds = {
+      "HDCPStatus": "hdcpStatus"
+    }
+
     def __init__(self, name, ptype, doc):
         self.name = name.replace(" ","")
         self.type = ptype
         self.doc = doc
+        if self.name in StructProperty.naming_workarounds.keys():
+            self.name = StructProperty.naming_workarounds[self.name]
 
     # used in fromMap call during deserialization
     def castedArgForm(self, mapName):

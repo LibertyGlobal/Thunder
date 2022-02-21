@@ -31,11 +31,12 @@ cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml
 cp ./package-files/README-onemw_api.md    $outdir/README.md 
 cp ./package-files/cpe_client_factory.dart  $outdir/lib/src/
 
-RDKSERVICES_ROOT=../../../rdkservices
+RDKSERVICES_ROOT=/rdk/flutter/api-gen/test/rdkservices/
 
 API_FILES="\
 $RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
 $RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
+$RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
 $RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
 $RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
 $RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
