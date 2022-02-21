@@ -5,7 +5,7 @@ from the API definition files.
 ## Main classes
 Following API classes are the entry points for using the OneMW API:
 - [DisplaySettings]
-- [LgiHdmiCec]
+- [HdmiCec]
 - [DisplayInfo]
 - [ActivityMonitor]
 - [PlayerInfo]

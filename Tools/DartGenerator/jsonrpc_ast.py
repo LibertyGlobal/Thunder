@@ -340,6 +340,10 @@ class Method:
         self.doc = doc.replace("\n","\n/// ")
         self.arguments = []
         self.result = None
+        self.required_arguments = None
+
+    def setRequiredArguments(self, required_arguments):
+        self.required_arguments = required_arguments
 
     def addArgument(self, argument):
         assert type(argument)is MethodArgument
@@ -362,11 +366,16 @@ class Method:
     def __str__(self):
         return f"method: {self.name}, result: {self.result.rtype} / {self.result.rtype.instanceResultCreationCode('TEST')}"
 
+    def getArgList(self):
+        args_str = []
+        for a in self.arguments:
+            o = '' if self.required_arguments and a.name in self.required_arguments else '?'
+            args_str.append(f"{str(a.type.typename())}{o} {str(a.name)}")
+
+        return ", ".join(args_str)
+
 def method_args_verbose(args):
     return ", ".join(["${" + f"{str(a.name)}" + "}" for a in args])
-
-def method_args(args):
-    return ", ".join([f"{str(a.type.typename())} {str(a.name)}" for a in args])
 
 def struct_ctor_args(args):
     return ", ".join([f"this.{str(p.name)}" for p in args])
@@ -417,7 +426,6 @@ class APIClass:
         file_loader = FileSystemLoader('templates')
         env = Environment(loader=file_loader)
         env.filters['any'] = any
-        env.filters['method_args'] = method_args
         env.filters['method_args_verbose'] = method_args_verbose
         env.filters['struct_ctor_args'] = struct_ctor_args
         env.filters['struct_ctor_args_from_map'] = struct_ctor_args_from_map

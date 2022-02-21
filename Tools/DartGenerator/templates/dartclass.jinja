@@ -137,7 +137,7 @@ class {{api.classname}}
   /// @result {{method.result.doc}}
   {% endif -%}
 
-  Future<{{method.result.rtype.typename()}}> {{method.name}} ({{ method.arguments | method_args }}) async {
+  Future<{{method.result.rtype.typename()}}> {{method.name}} ({{ method.getArgList() }}) async {
     if (_verbose) {
       print("Calling {{method.name}} / {{method.callsign}} {{method.arguments | method_args_verbose}})");
     }

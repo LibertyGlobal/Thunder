@@ -280,6 +280,9 @@ def buildMethods(apiclass, wsapi, json_filename, filename):
                     for a in method_arguments:
                         method.addArgument(a)
 
+                    if 'required' in params_description:
+                        method.setRequiredArguments(params_description['required'])
+
             apiclass.addMethod(method)
 
 def buildEvents(apiclass, wsapi, json_filename, filename):
