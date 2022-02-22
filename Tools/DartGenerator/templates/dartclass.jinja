@@ -142,7 +142,19 @@ class {{api.classname}}
       print("Calling {{method.name}} / {{method.callsign}} {{method.arguments | method_args_verbose}})");
     }
 
+{% if method.arguments | length %}
+  final Map<String,dynamic> params = {{ method.getNonOptionalArgsToJson() }};
+{% for a in method.arguments -%}
+{% if method.isArgumentOptional(a) -%}
+  if ({{a.name}} != null) {
+    params['{{a.name}}'] = {{a.name}};
+  }
+{% endif -%}
+{% endfor -%}
+    final result = await _client.sendRequest('{{method.callsign}}', params);
+{% else %}
     final result = await _client.sendRequest('{{method.callsign}}');
+{% endif %}
 
     if (_verbose) {
       print("{{method.name}} result: ${result}");

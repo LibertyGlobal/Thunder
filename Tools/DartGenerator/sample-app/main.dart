@@ -48,11 +48,13 @@ void main() async {
   print("ds out: ${await ds_api.getVolumeLevel("HDMI0")}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
-  print("ds out: ${(await ds_api.getTvHDRSupport())}");
+  print("ds out: ${await ds_api.getTvHDRSupport()}");
   print("ds out: ${await ds_api.getDefaultResolution()}");
+  print("ds out: ${ds_api.setPreferredOutputColorSpace("HDMI0", ["BT2020_NCL"])}");
 
   print("cc out: ${await cc_api.getCECAddresses()}");
   print("cc out: ${await cc_api.getEnabled()}");
   print("cc out: ${await cc_api.getConnectedDevices()}");
+  print("cc out: ${cc_api.setOneTouchViewPolicy(true)}");
 }
 

@@ -374,6 +374,17 @@ class Method:
 
         return ", ".join(args_str)
 
+    def getNonOptionalArgsToJson(self):
+        args_str = []
+        for a in self.arguments:
+            if (self.required_arguments and a.name in self.required_arguments):
+                args_str.append(f"'{str(a.name)}' : {str(a.name)}")
+
+        return "{" + ", ".join(args_str) + "}";
+
+    def isArgumentOptional(self, arg):
+        return not (self.required_arguments and arg.name in self.required_arguments)
+
 def method_args_verbose(args):
     return ", ".join(["${" + f"{str(a.name)}" + "}" for a in args])
 
