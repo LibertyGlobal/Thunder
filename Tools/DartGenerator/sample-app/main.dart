@@ -46,11 +46,11 @@ void main() async {
 
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
   print("ds out: ${await ds_api.getVolumeLevel(audioPort:"HDMI0")}");
+  print("ds out: ${ds_api.setPreferredOutputColorSpace(["BT2020_NCL"], videoDisplay:"HDMI0"  )}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
   print("ds out: ${await ds_api.getTvHDRSupport()}");
   print("ds out: ${await ds_api.getDefaultResolution()}");
-  print("ds out: ${ds_api.setPreferredOutputColorSpace(["BT2020_NCL"], videoDisplay:"HDMI0"  )}");
 
   print("cc out: ${await cc_api.getCECAddresses()}");
   print("cc out: ${await cc_api.getEnabled()}");

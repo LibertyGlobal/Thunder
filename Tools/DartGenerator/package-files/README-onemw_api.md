@@ -6,6 +6,7 @@ from the API definition files.
 Following API classes are the entry points for using the OneMW API:
 - [DisplaySettings]
 - [HdmiCec]
+- [HdcpProfile]
 - [DisplayInfo]
 - [ActivityMonitor]
 - [PlayerInfo]
@@ -49,10 +50,11 @@ void main() async {
   print("di out hdcpprotectionProperty: ${await di_api.hdcpprotectionProperty()}");
 
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
-  print("ds out: ${await ds_api.getVolumeLevel("HDMI0")}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
   print("ds out: ${await ds_api.getDefaultResolution()}");
+  print("ds out: ${await ds_api.getVolumeLevel(audioPort:"HDMI0")}");
+  print("ds out: ${ds_api.setPreferredOutputColorSpace(["BT2020_NCL"], videoDisplay:"HDMI0")}");
 
   ds_api.stream.listen((event) {print ('event: ${event}');});
 }
@@ -62,6 +64,7 @@ void main() async {
 The best effort was made to document the dart classes. The original API definition in json files is provided here for reference:
  * [DisplaySettings.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiDisplaySettings/LgiDisplaySettings.json)
  * [LgiHdmiCec.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdmiCec/LgiHdmiCec.json)
+ * [LgiHdcpProfile.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdcpProfile/LgiHdcpProfile.json)
  * [DisplayInfo.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/DisplayInfo/DisplayInfo.json)
  * [ActivityMonitor.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/ActivityMonitor/ActivityMonitor.json)
  * [PlayerInfo.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/PlayerInfo/PlayerInfo.json)
