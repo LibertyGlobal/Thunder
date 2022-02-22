@@ -46,7 +46,7 @@ void main() async {
 
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
   print("ds out: ${await ds_api.getVolumeLevel(audioPort:"HDMI0")}");
-  print("ds out: ${ds_api.setPreferredOutputColorSpace(["BT2020_NCL"], videoDisplay:"HDMI0"  )}");
+  print("ds out: ${ds_api.setPreferredOutputColorSpace(colorSpaces:["BT2020_NCL"], videoDisplay:"HDMI0"  )}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
   print("ds out: ${await ds_api.getTvHDRSupport()}");
@@ -55,6 +55,6 @@ void main() async {
   print("cc out: ${await cc_api.getCECAddresses()}");
   print("cc out: ${await cc_api.getEnabled()}");
   print("cc out: ${await cc_api.getConnectedDevices()}");
-  print("cc out: ${cc_api.setOneTouchViewPolicy(true)}");
+  print("cc out: ${cc_api.setOneTouchViewPolicy(turnOffAllDevices:true)}");
 }
 

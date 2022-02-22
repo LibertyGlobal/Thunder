@@ -367,23 +367,27 @@ class Method:
         return f"method: {self.name}, result: {self.result.rtype} / {self.result.rtype.instanceResultCreationCode('TEST')}"
 
     def getArgList(self):
-        args_str = []
+        required_args_str = []
         optional_args_str = []
+
         for a in self.arguments:
             if self.isArgumentOptional(a):
                 optional_args_str.append(f"{str(a.type.typename())}? {str(a.name)}")
             else:
-                args_str.append(f"{str(a.type.typename())} {str(a.name)}")
+                required_args_str.append(f"required {str(a.type.typename())} {str(a.name)}")
 
         args_items = []
 
-        if len(args_str):
-            args_items.append(", ".join(args_str))
+        if len(required_args_str):
+            args_items.append(", ".join(required_args_str))
 
         if len(optional_args_str):
-            args_items.append("{ " + ", ".join(optional_args_str) + " }")
+            args_items.append(", ".join(optional_args_str))
 
-        return ", ".join( args_items )
+        if len(args_items) > 0:
+            return "{" + ", ".join( args_items ) + "}"
+
+        return ""
 
     def getNonOptionalArgsToJson(self):
         args_str = []
