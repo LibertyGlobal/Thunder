@@ -45,12 +45,12 @@ void main() async {
   ds_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
 
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
-  print("ds out: ${await ds_api.getVolumeLevel("HDMI0")}");
+  print("ds out: ${await ds_api.getVolumeLevel(audioPort:"HDMI0")}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).standards}");
   print("ds out: ${(await ds_api.getTvHDRSupport()).supportsHDR}");
   print("ds out: ${await ds_api.getTvHDRSupport()}");
   print("ds out: ${await ds_api.getDefaultResolution()}");
-  print("ds out: ${ds_api.setPreferredOutputColorSpace("HDMI0", ["BT2020_NCL"])}");
+  print("ds out: ${ds_api.setPreferredOutputColorSpace(["BT2020_NCL"], videoDisplay:"HDMI0"  )}");
 
   print("cc out: ${await cc_api.getCECAddresses()}");
   print("cc out: ${await cc_api.getEnabled()}");

@@ -368,11 +368,22 @@ class Method:
 
     def getArgList(self):
         args_str = []
+        optional_args_str = []
         for a in self.arguments:
-            o = '' if self.required_arguments and a.name in self.required_arguments else '?'
-            args_str.append(f"{str(a.type.typename())}{o} {str(a.name)}")
+            if self.isArgumentOptional(a):
+                optional_args_str.append(f"{str(a.type.typename())}? {str(a.name)}")
+            else:
+                args_str.append(f"{str(a.type.typename())} {str(a.name)}")
 
-        return ", ".join(args_str)
+        args_items = []
+
+        if len(args_str):
+            args_items.append(", ".join(args_str))
+
+        if len(optional_args_str):
+            args_items.append("{ " + ", ".join(optional_args_str) + " }")
+
+        return ", ".join( args_items )
 
     def getNonOptionalArgsToJson(self):
         args_str = []
