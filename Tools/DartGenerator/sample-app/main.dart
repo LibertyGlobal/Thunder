@@ -15,7 +15,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:onemw_api/onemw_api.dart';
+import 'package:onemw_rdkservices_api/onemw_rdkservices_api.dart';
+import 'dart:io';
+import 'dart:async';
 
 int f(var x) {
   // String x = "123";
@@ -29,7 +31,7 @@ void main() async {
   var cc_api = HdmiCec();
   cc_api.verbose = true;
 
-  // ds_api.verbose = true;
+  ds_api.verbose = true;
   // di_api.verbose = true;
   print("di out hdcpprotectionPr: ${await di_api.hdcpprotectionProperty()}");
   print("di out hdrsettingProper: ${await di_api.hdrsettingProperty()}");
@@ -56,5 +58,7 @@ void main() async {
   print("cc out: ${await cc_api.getEnabled()}");
   print("cc out: ${await cc_api.getConnectedDevices()}");
   print("cc out: ${cc_api.setOneTouchViewPolicy(turnOffAllDevices:true)}");
+
+  var timer = Timer(Duration(milliseconds: 100), () => exit(0));
 }
 

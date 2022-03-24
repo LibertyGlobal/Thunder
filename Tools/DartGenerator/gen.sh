@@ -23,7 +23,7 @@ function CamelCase_to_snake_case() {
 }
 
 outdir=./onemw-rdkservices-api/
-lib_main_file=$outdir/lib/onemw_api.dart
+lib_main_file=$outdir/lib/onemw_rdkservices_api.dart
 
 mkdir -p $outdir/lib/src
 
@@ -59,9 +59,10 @@ done
 
 rm -rf $lib_main_file
 for f in `find $outdir/lib/src -name "*.dart" | grep -v "freeze" | grep -v "\.g\." | grep -v "cpe_client_factory.dart"`; do
-  echo "export 'src/`basename $f`';" >> $outdir/lib/onemw_api.dart
-  dart format $outdir/lib/onemw_api.dart
+  echo "export 'src/`basename $f`';" >> $lib_main_file
 done
+
+dart format $lib_main_file
 
 pushd $outdir
 echo ">>>>> dart pub get"
