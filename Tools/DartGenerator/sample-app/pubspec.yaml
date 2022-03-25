@@ -2,6 +2,7 @@ name: testapp
 dependencies:
   json_rpc_2: ^3.0.1
   web_socket_channel: ^2.1.0
+  freezed: 1.1.0
   onemw_rdkservices_api:
     path: ../onemw-rdkservices-api/
     # path: ../test/onemw-rdkservices-api
