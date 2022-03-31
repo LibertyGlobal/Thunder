@@ -1,6 +1,15 @@
 name: onemw_rdkservices_api
 version: 0.0.1
 
+descirption:
+  The library provides native dart implementation of API provided by Thunder/RDK Services component of OneMW.
+
+homepage:
+  https://bitbucket.upc.biz/projects/PERS/repos/onemw-rdkservices-api/browse
+
+platforms:
+  linux
+
 dependencies:
   json_rpc_2: 3.0.1
   web_socket_channel: 2.1.0

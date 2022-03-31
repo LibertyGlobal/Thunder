@@ -29,6 +29,7 @@ void main() async {
   var ds_api = DisplaySettings();
   var di_api = DisplayInfo();
   var cc_api = HdmiCec();
+  var hdcp_api = HdcpProfile();
   cc_api.verbose = true;
 
   ds_api.verbose = true;
@@ -45,6 +46,8 @@ void main() async {
 
 
   ds_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
+  cc_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
+  hdcp_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
 
   print("ds out: ${await ds_api.getConnectedAudioPorts()}");
   print("ds out: ${await ds_api.getVolumeLevel(audioPort:"HDMI0")}");
@@ -59,6 +62,6 @@ void main() async {
   print("cc out: ${await cc_api.getConnectedDevices()}");
   print("cc out: ${cc_api.setOneTouchViewPolicy(turnOffAllDevices:true)}");
 
-  var timer = Timer(Duration(milliseconds: 100), () => exit(0));
+  // var timer = Timer(Duration(milliseconds: 100), () => exit(0));
 }
 

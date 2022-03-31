@@ -117,7 +117,9 @@ class StructProperty:
         self.name = name.replace(" ","")
         self.type = ptype
         self.doc = doc
+        self.json_key = None
         if self.name in StructProperty.naming_workarounds.keys():
+            self.json_key = self.name
             self.name = StructProperty.naming_workarounds[self.name]
 
     # used in fromMap call during deserialization
