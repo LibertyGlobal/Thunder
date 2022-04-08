@@ -20,6 +20,8 @@ dev_dependencies:
   freezed_annotation: 1.1.0
   json_annotation:   4.4.0
   json_serializable: 6.1.4
+  mockito: 5.1.0
+  test: 1.20.2
 
 environment:
   sdk: '>=2.15.0 <3.0.0'

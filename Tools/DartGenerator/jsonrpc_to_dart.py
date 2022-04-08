@@ -349,6 +349,8 @@ if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(description='rdkservices dart API generator')
     arg_parser.add_argument('-i','--in', help="file to read json from", action="store", dest='in_file',  default='json-defs/DisplayInfo.json', type=str)
     arg_parser.add_argument('-o','--out', help="file to write generated dart code to", action="store", dest='out_file',  default=None, type=str)
+    arg_parser.add_argument('-t','--tests', help="file to write generated dart code for tests to", action="store", dest='test_out_file',  default=None, type=str)
+    arg_parser.add_argument('-j','--json', help="file to write dart code for json generation to", action="store", dest='jsongen_out_file',  default=None, type=str)
     arg_parser.add_argument('-x', help="do not generate code", action="store_true", dest='skip_generation',  default=False)
     arg_parser.add_argument('-v', help="show ast items", action="store_true", dest='show_ast',  default=False)
     program_options = arg_parser.parse_args()
@@ -366,7 +368,21 @@ if __name__ == '__main__':
 
     apiclass = buildAST(wsapi, program_options.in_file, filename)
     if not program_options.skip_generation:
-        apiclass.generateCode(filename, outfile, program_options.show_ast)
+        apiclass.generateCode(filename, outfile, 'dartclass.jinja',program_options.show_ast)
 
     if program_options.out_file:
-        f.close()
+        outfile.close()
+
+    if program_options.test_out_file:
+        testoutfile = open(program_options.test_out_file,"w+")
+        testfilename = program_options.test_out_file.split('/')[-1].split('.')[0]
+        if not program_options.skip_generation:
+            apiclass.generateCode(testfilename, testoutfile, 'testdartclass.jinja', program_options.show_ast)
+        testoutfile.close()
+
+    if program_options.jsongen_out_file:
+        jsongenoutfile = open(program_options.jsongen_out_file,"w+")
+        jsongenfilename = program_options.jsongen_out_file.split('/')[-1].split('.')[0]
+        if not program_options.skip_generation:
+            apiclass.generateCode(jsongenfilename, jsongenoutfile, 'jsongendartclass.jinja', program_options.show_ast)
+        jsongenoutfile.close()

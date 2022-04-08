@@ -26,6 +26,7 @@ outdir=./onemw-rdkservices-api/
 lib_main_file=$outdir/lib/onemw_rdkservices_api.dart
 
 mkdir -p $outdir/lib/src
+mkdir -p $outdir/test/jsons/tool
 
 cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml 
 cp ./package-files/README-onemw_api.md    $outdir/README.md 
@@ -36,8 +37,8 @@ RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
 API_FILES="\
 $RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
 $RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
-$RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
 $RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
+$RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
 $RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
 $RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
 $RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
@@ -50,12 +51,20 @@ for i in $API_FILES; do
     corefilename=`basename -s .json $i`.dart
     dartfilename=`CamelCase_to_snake_case $corefilename`
     dartfilepath=$outdir/lib/src/${dartfilename}
-    python3 jsonrpc_to_dart.py -i $i -o  ${dartfilepath}
+    testfilename=`basename -s .json $i`_test.dart
+    testdartfilename=`CamelCase_to_snake_case $testfilename`
+    testdartfilepath=$outdir/test/${testdartfilename}
+    genjsonfilename=`basename -s .json $i`_genjson.dart
+    genjsondartfilename=`CamelCase_to_snake_case $genjsonfilename`
+    genjsondartfilepath=$outdir/test/jsons/tool/${genjsondartfilename}
+    python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath}
     dart format -l 120 ${dartfilepath}
+    dart format -l 120 ${testdartfilepath}
+    dart format -l 120 ${genjsondartfilepath}
   else
     echo "$i does not exists..."
   fi
-done 
+done
 
 rm -rf $lib_main_file
 for f in `find $outdir/lib/src -name "*.dart" | grep -v "freeze" | grep -v "\.g\." | grep -v "cpe_client_factory.dart"`; do
@@ -78,8 +87,23 @@ echo ">>>>> dart doc"
 if [ -x $HOME/.pub-cache/bin/dartdoc ]; then
   $HOME/.pub-cache/bin/dartdoc
 fi
-popd
 
+if [ -z ${CPE_HOST+x} ]; then
+  echo "CPE_HOST not set, skipping jsons for tests generation"
+else
+  for f in `find ./test/jsons/tool -name "*.dart"`; do
+    CPE_HOST=$CPE_HOST dart test --chain-stack-traces $f
+  done
+  for f in `find ./test/jsons -name "*success_out.json"`; do
+    json=`echo $f | sed 's/success/failure/'`
+    cp $f $json
+    sed -i 's/"success":true/"success":false/g' $json
+  done
+  CPE_HOST=$CPE_HOST dart test --chain-stack-traces ./test/*
+fi
+
+popd
+exit
 echo ">>>>> running sample app"
 pushd sample-app/
 dart pub get

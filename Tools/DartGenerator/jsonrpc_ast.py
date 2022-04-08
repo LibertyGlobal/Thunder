@@ -16,6 +16,7 @@
 # limitations under the License.
 
 from enum import Enum
+from pickle import TRUE
 from jinja2 import Environment, FileSystemLoader
 
 class VoidType:
@@ -28,7 +29,7 @@ class VoidType:
     def typename(self):
         return "void"
 
-    def instanceResultCreationCode(self, result=None):
+    def instanceResultCreationCode(self, result=None, fromJson: bool=True):
         return ""
 
 class SimpleType(object):
@@ -53,7 +54,7 @@ class SimpleType(object):
         }
         return f"{dartmap[self.simple_type]}"
 
-    def instanceResultCreationCode(self, result=None):
+    def instanceResultCreationCode(self, result=None, fromJson: bool=True):
         dartmap = {
            "boolean":f"{result} as bool",
            "integer":f"{result} is int ? {result} : int.parse({result})",
@@ -76,7 +77,7 @@ class ArrayType:
     def remapDynamicListCode(self, dynamic_list):
         return f"({dynamic_list} as List).map( (item) => item as {self.item_type.typename()} ).toList()"
 
-    def instanceResultCreationCode(self, result=None):
+    def instanceResultCreationCode(self, result=None, fromJson: bool=True):
         return self.remapDynamicListCode(result)
 
 class StructTypeUsage(Enum):
@@ -131,6 +132,9 @@ class StructProperty:
 
     def __str__(self):
         return f"StructProperty:( name: {self.name} type:{self.type} )"
+
+    def getJsonFieldName(self):
+        return self.json_key if self.json_key is not None else self.name
 
 class StructType:
     registered_struct_types = {}
@@ -248,19 +252,21 @@ class StructType:
             return self.reduced_type.typename()
         return f"{self.structConvertedName()}"
 
-    def instanceResultCreationCode(self, result=None):
+    def instanceResultCreationCode(self, result=None, fromJson: bool=True):
         #return HdcpProfile.fromJson(result[{self.result.rtype.reduced_property_field_name}]);
         # print(f"instanceResultCreationCode: {result}");
         if self.reduced_property_field_name:
             assert self.reduced_type
             # print(f"instanceResultCreationCode {self.reduced_property_field_name}")
-            return self.reduced_type.instanceResultCreationCode(f"{result}['{self.reduced_property_field_name}']")
+            return self.reduced_type.instanceResultCreationCode(f"{result}['{self.reduced_property_field_name}']", fromJson)
         elif self.reduced_type:
-            return self.reduced_type.instanceResultCreationCode(result)
+            return self.reduced_type.instanceResultCreationCode(result, fromJson)
         else:
-            # args = [f"result{rf}['{str(p.name)}']" for p in self.properties]
-            # return f"{self}.fromMap({', '.join(args)})"
-            return f"{self.typename()}.fromJson({result})"
+            if fromJson:
+                return f"{self.typename()}.fromJson({result})"
+            else:
+                args = [ p.type.instanceResultCreationCode(f"{result}['{p.name}']") for p in self.properties]
+                return f"{self.typename()}({', '.join(args)})"
 
     def getCtorArgs(self):
         assert self.usage == StructTypeUsage.EVENT
@@ -433,7 +439,7 @@ class APIClass:
     def addProperty(self, property):
         self.properties.append(property)
 
-    def generateCode(self, filename, outfile, show_ast):
+    def generateCode(self, filename, outfile, templatefile, show_ast):
         for e in self.events:
             e.markJsonSerializableProperties()
 
@@ -459,7 +465,7 @@ class APIClass:
         env.filters['struct_ctor_args'] = struct_ctor_args
         env.filters['struct_ctor_args_from_map'] = struct_ctor_args_from_map
 
-        template = env.get_template('dartclass.jinja')
+        template = env.get_template(templatefile)
         output = template.render(api=self)
 
         print(output, file=outfile)

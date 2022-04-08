@@ -25,6 +25,8 @@ import 'cpe_client_factory.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 part '{{api.filename}}.g.dart';
 part '{{api.filename}}.freezed.dart';
+{% else %}
+import 'package:meta/meta.dart';
 {% endif %}
 
 {% for s in api.structs -%}
@@ -97,7 +99,7 @@ class {{api.baseEventName}} with _${{api.baseEventName}}{
 {% endif %}
 class {{api.classname}}
 {
-  final jsonrpc2.Peer _client = CpeRpcClient(CpeRpcService.thunder).client;
+  late final jsonrpc2.Peer _client;
   bool _verbose = false;
 
   {% if api.events | length > 0 %}
@@ -105,7 +107,17 @@ class {{api.classname}}
   static int _instanceCount = 0;
   {% endif %}
 
+  @visibleForTesting
+  {{api.classname}}.test(jsonrpc2.Peer client) {
+    _client = client;
+  {% if api.events | length > 0 %}
+    _instanceCount++;
+    _streamController = _createStreamController();
+  {% endif %}
+  }
+
   {{api.classname}}() {
+    _client = CpeRpcClient(CpeRpcService.thunder).client;
   {% if api.events | length > 0 %}
     _instanceCount++;
     _streamController = _createStreamController();
