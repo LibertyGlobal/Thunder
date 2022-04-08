@@ -94,7 +94,8 @@ def reduceType(intype):
     reduced_properties = [ p for p in intype.properties if p.name not in exlcluded ]
 
     if len(reduced_properties)==1:
-        return reduced_properties[0].type, reduced_properties[0].name
+        property_field_name = reduced_properties[0].json_key if reduced_properties[0].json_key is not None else reduced_properties[0].name
+        return reduced_properties[0].type, property_field_name
 
     if len(reduced_properties)>1:
         reduced_type = StructType(intype.struct_name+"_reduced", intype.doc)
