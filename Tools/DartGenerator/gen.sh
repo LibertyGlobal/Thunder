@@ -26,37 +26,42 @@ outdir=./onemw-rdkservices-api/
 lib_main_file=$outdir/lib/onemw_rdkservices_api.dart
 
 mkdir -p $outdir/lib/src
-mkdir -p $outdir/test/jsons/tool
+mkdir -p $outdir/test/jsons/
+mkdir -p $outdir/test/tool/
 
 cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml 
 cp ./package-files/README-onemw_api.md    $outdir/README.md 
 cp ./package-files/cpe_client_factory.dart  $outdir/lib/src/
+cp -r ./package-files/jsons  $outdir/test/
 
-RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
+#RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
+RDKSERVICES_ROOT=/home/smiasojed/Development/oe-builds/apollo_new/onemw/onemw-src/rdkservices/
+
+#API_FILES="\
+#$RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
+#$RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
+#$RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
+#$RDKSERVICES_ROOT/XCast/XCast.json \
+#"
 
 API_FILES="\
-$RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
-$RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
-$RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
-$RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
-$RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
-$RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
-$RDKSERVICES_ROOT/XCast/XCast.json \
+$RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
+$RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
+$RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
 "
 
 for i in $API_FILES; do 
   echo $i
   if [ -f $i ]; then
-    corefilename=`basename -s .json $i`.dart
-    dartfilename=`CamelCase_to_snake_case $corefilename`
+    basename=`basename -s .json $i`
+    filename=`CamelCase_to_snake_case ${basename}`
+    dartfilename=${filename}.dart
     dartfilepath=$outdir/lib/src/${dartfilename}
-    testfilename=`basename -s .json $i`_test.dart
-    testdartfilename=`CamelCase_to_snake_case $testfilename`
+    testdartfilename=${filename}_test.dart
     testdartfilepath=$outdir/test/${testdartfilename}
-    genjsonfilename=`basename -s .json $i`_genjson.dart
-    genjsondartfilename=`CamelCase_to_snake_case $genjsonfilename`
-    genjsondartfilepath=$outdir/test/jsons/tool/${genjsondartfilename}
+    genjsondartfilename=${filename}_genjson.dart
+    genjsondartfilepath=$outdir/test/tool/${genjsondartfilename}
     python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath}
     dart format -l 120 ${dartfilepath}
     dart format -l 120 ${testdartfilepath}
@@ -91,19 +96,22 @@ fi
 if [ -z ${CPE_HOST+x} ]; then
   echo "CPE_HOST not set, skipping jsons for tests generation"
 else
-  for f in `find ./test/jsons/tool -name "*.dart"`; do
+  for f in `find ./test/tool -name "*.dart"`; do
     CPE_HOST=$CPE_HOST dart test --chain-stack-traces $f
   done
-  for f in `find ./test/jsons -name "*success_out.json"`; do
-    json=`echo $f | sed 's/success/failure/'`
-    cp $f $json
-    sed -i 's/"success":true/"success":false/g' $json
-  done
-  CPE_HOST=$CPE_HOST dart test --chain-stack-traces ./test/*
 fi
 
+for f in `find ./test/jsons -name "*success_out.json"`; do
+  json=`echo $f | sed 's/success/failure/'`
+  cp $f $json
+  sed -i 's/"success":true/"success":false/g' $json
+done
+for f in `find ./test -name "*test.dart"`; do
+  dart test --chain-stack-traces $f
+done
+
 popd
-exit
+
 echo ">>>>> running sample app"
 pushd sample-app/
 dart pub get

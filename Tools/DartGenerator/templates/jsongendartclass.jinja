@@ -48,13 +48,13 @@ void main() async {
   group('{{api.classname}} {{property.name}}', () {
 
     test('{{property.name}}Property success call', () async {
-      final outFile = new File('test/jsons/{{property.name}}_success_out.json');
+      final outFile = new File('test/jsons/{{api.classname}}_{{property.name}}_success_out.json');
       outFile.writeAsStringSync('');
       final socket = WebSocketChannel.connect( Uri.parse('ws://${CpePlatform.host}:9998/jsonrpc'));
       final stream = socket.stream.map((s) {  outFile.writeAsStringSync("${s}", mode: FileMode.append); return s; });
       final channel = StreamChannel.withCloseGuarantee(stream, socket.sink);
       final peer = new jsonrpc2.Peer( channel.cast<String>() );
-
+      peer.listen();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
       expect(await () async => api.{{property.name}}Property(), returnsNormally);
@@ -64,13 +64,11 @@ void main() async {
 
 {% for method in api.methods %}
   group('{{api.classname}} {{method.name}}', () {
-{% if not 'void' in method.result.rtype.typename() -%}
-
     test('{{method.name}} success call', () async {
 {% if method.arguments | length >0 -%}
-      final argsInDecoded = json.decode(File('test/jsons/{{method.name}}_success_in.json').readAsStringSync());
+      final argsInDecoded = json.decode(File('test/jsons/{{api.classname}}_{{method.name}}_success_in.json').readAsStringSync());
 {% endif -%}
-      final outFile = new File('test/jsons/{{method.name}}_success_out.json');
+      final outFile = new File('test/jsons/{{api.classname}}_{{method.name}}_success_out.json');
       outFile.writeAsStringSync('');
       final socket = WebSocketChannel.connect( Uri.parse('ws://${CpePlatform.host}:9998/jsonrpc'));
       final stream = socket.stream.map((s) {  outFile.writeAsStringSync("${s}", mode: FileMode.append); return s; });
@@ -87,7 +85,6 @@ void main() async {
 {% endfor %}
         ), returnsNormally);
     });
-{% endif %}
   });
 {% endfor %}
 
@@ -103,7 +100,7 @@ group('{{api.classname}} notifications', () {
         final event = argsDecoded['method'];
         if( event != null ) {
           final eventName = event.substring(event.indexOf('.') + 1);
-          final outFile = new File('test/jsons/${eventName}_success_out.json');
+          final outFile = new File('test/jsons/{{api.classname}}_${eventName}_success_out.json');
           outFile.writeAsStringSync(s);
         }
         return s; 

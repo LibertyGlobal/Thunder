@@ -31,7 +31,7 @@ void main() async {
   group('{{api.classname}} {{property.name}}', () {
 
     test('{{property.name}}Property success call', () async {
-      final argsOutDecoded = json.decode(File('test/jsons/{{property.name}}_success_out.json').readAsStringSync());
+      final argsOutDecoded = json.decode(File('test/jsons/{{api.classname}}_{{property.name}}_success_out.json').readAsStringSync());
       final peer = new MockPeer();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
@@ -39,17 +39,6 @@ void main() async {
           .thenAnswer((_) async => (argsOutDecoded['result']));
 
       expect(await api.{{property.name}}Property(), equals({{property.type.instanceResultCreationCode(result="argsOutDecoded['result']", fromJson=False)}}));
-    });
-
-    test('{{property.name}}Property failure call', () {
-      final argsOutDecoded = json.decode(File('test/jsons/{{property.name}}_failure_out.json').readAsStringSync());
-      final peer = new MockPeer();
-      final api = new {{api.classname}}.test(peer);
-      api.verbose = true;
-      when(peer.sendRequest('{{property.callsign}}'))
-          .thenAnswer((_) async => (argsOutDecoded['result']));
-
-      expect(api.{{property.name}}Property(), equals(throwsA(equals('Request failure'))));
     });
   });
 {% endfor %}
@@ -60,9 +49,9 @@ void main() async {
 
     test('{{method.name}} success call', () async {
 {% if method.arguments | length >0 -%}
-        final argsInDecoded = json.decode(File('test/jsons/{{method.name}}_success_in.json').readAsStringSync());
+        final argsInDecoded = json.decode(File('test/jsons/{{api.classname}}_{{method.name}}_success_in.json').readAsStringSync());
 {% endif -%}
-      final argsOutDecoded = json.decode(File('test/jsons/{{method.name}}_success_out.json').readAsStringSync());
+      final argsOutDecoded = json.decode(File('test/jsons/{{api.classname}}_{{method.name}}_success_out.json').readAsStringSync());
       final peer = new MockPeer();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
@@ -75,7 +64,7 @@ void main() async {
 {% endif -%}
       expect(await api.{{method.name}}(
 {% for a in method.arguments -%}
-          {{a.name}}: argsInDecoded['{{a.name}}']
+          {{a.name}}: {{a.type.instanceResultCreationCode(result='argsInDecoded[\'' + a.name + '\']', fromJson=False)}}
           {{ ", " if not loop.last else "" }}
 {% endfor %}
         ), equals({{method.result.rtype.instanceResultCreationCode(result="argsOutDecoded['result']", fromJson=False)}}));
@@ -84,9 +73,9 @@ void main() async {
 
     test('{{method.name}} failure call', () {
 {% if method.arguments | length >0 -%}
-      final argsInDecoded = json.decode(File('test/jsons/{{method.name}}_success_in.json').readAsStringSync());
+      final argsInDecoded = json.decode(File('test/jsons/{{api.classname}}_{{method.name}}_success_in.json').readAsStringSync());
 {% endif -%}
-      final argsOutDecoded = json.decode(File('test/jsons/{{method.name}}_failure_out.json').readAsStringSync());
+      final argsOutDecoded = json.decode(File('test/jsons/{{api.classname}}_{{method.name}}_failure_out.json').readAsStringSync());
       final peer = new MockPeer();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
@@ -99,7 +88,7 @@ void main() async {
 {% endif -%}
       expect(api.{{method.name}}(
 {% for a in method.arguments -%}
-          {{a.name}}: argsInDecoded['{{a.name}}']
+          {{a.name}}: {{a.type.instanceResultCreationCode(result='argsInDecoded[\'' + a.name + '\']', fromJson=False)}}
           {{ ", " if not loop.last else "" }}
 {% endfor %}
         ), equals(throwsA(equals('Request failure'))));
@@ -112,7 +101,7 @@ group('{{api.classname}} notifications', () {
 {%- for e in api.events %}
     test('{{e.name}} notification', () async {
 {% if e.arguments[0].type.properties | length > 0 -%}
-      final {{e.name}}ArgsOutDecoded = json.decode(File('test/jsons/{{e.name}}_success_out.json').readAsStringSync());
+      final {{e.name}}ArgsOutDecoded = json.decode(File('test/jsons/{{api.classname}}_{{e.name}}_success_out.json').readAsStringSync());
 {% endif -%}
       final peer = new MockPeer();
       final api = new {{api.classname}}.test(peer);
@@ -129,7 +118,7 @@ group('{{api.classname}} notifications', () {
 {% if e.arguments[0].type.properties | length > 0 -%}
             args[i+1](jsonrpc2.Parameters(args[i], {{e.name}}ArgsOutDecoded['params']));
 {% else %}
-            args[i+1](jsonrpc2.Parameters(args[i], null));
+            args[i+1](jsonrpc2.Parameters(args[i], <String,dynamic>{}));
 {% endif -%}
             break;
           }

@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","method":"ConnectedAudioPortUpdatedEvent85.connectedAudioPortUpdated","params":{"HotpluggedAudioPort":"HDMI0","isConnected":"connected"}}

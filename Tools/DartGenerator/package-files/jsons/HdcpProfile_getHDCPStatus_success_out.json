@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","id":0,"result":{"HDCPStatus":{"isConnected":true,"isHDCPCompliant":true,"isHDCPEnabled":true,"hdcpReason":2,"supportedHDCPVersion":"2.2","receiverHDCPVersion":"2.2","currentHDCPVersion":"2.2"},"success":true}}

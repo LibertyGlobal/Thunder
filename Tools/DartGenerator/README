@@ -10,3 +10,11 @@ The `gen.sh script` runs the generator for each json file from `API_FILES`
 list and generates the package in the directory pointed by `outdir` variable.
 
 Currently both variables are hardcoded in gen.sh script.
+
+# tests
+The `gen.sh script` generates tests based on mocks.
+The mocks are using real jsons from communication with CPE.
+You can grab the jsons using command:
+CPE_HOST=[Your CPE IP] dart test --chain-stack-traces ./test/tool/*
+To run the test please execute:
+dart test --chain-stack-traces ./test/[Test name]

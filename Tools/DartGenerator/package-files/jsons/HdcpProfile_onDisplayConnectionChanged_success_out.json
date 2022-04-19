@@ -1,0 +1,1 @@
+{"jsonrpc":"2.0","method":"OnDisplayConnectionChangedEvent4.onDisplayConnectionChanged","params":{"HDCPStatus":{"isConnected":false,"isHDCPCompliant":false,"isHDCPEnabled":false,"hdcpReason":1,"supportedHDCPVersion":"2.2","receiverHDCPVersion":"1.4","currentHDCPVersion":"1.4"}}}

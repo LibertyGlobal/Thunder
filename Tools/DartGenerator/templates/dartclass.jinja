@@ -241,7 +241,7 @@ class {{api.classname}}
       "${eventId}.${eventName}",
       (jsonrpc2.Parameters data) {
         if (_verbose) {
-          print("event: ${eventId}.${eventName} ${data}");
+          print("event: {{e.arguments[0].type.typename()}}{{ "${" }}_instanceCount{{ "}" }}.{{e.name}} ${data}");
         }
         final response = data.value;
         streamController.add({{api.baseEventName}}.{{e.arguments[0].type.typename()}}FromJsonFactory(response));
