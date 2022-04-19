@@ -44,6 +44,13 @@ RDKSERVICES_ROOT=/home/smiasojed/Development/oe-builds/apollo_new/onemw/onemw-sr
 #$RDKSERVICES_ROOT/XCast/XCast.json \
 #"
 
+#API_FILES="\
+#$RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
+#$RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
+#$RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
+#$RDKSERVICES_ROOT/XCast/XCast.json \
+#"
+
 API_FILES="\
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
 $RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
