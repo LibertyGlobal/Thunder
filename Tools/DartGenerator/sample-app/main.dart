@@ -27,23 +27,10 @@ int f(var x) {
 
 void main() async {
   var ds_api = DisplaySettings();
-  var di_api = DisplayInfo();
   var cc_api = HdmiCec();
   var hdcp_api = HdcpProfile();
   cc_api.verbose = true;
-
   ds_api.verbose = true;
-  // di_api.verbose = true;
-  print("di out hdcpprotectionPr: ${await di_api.hdcpprotectionProperty()}");
-  print("di out hdrsettingProper: ${await di_api.hdrsettingProperty()}");
-  print("di out heightProperty(): ${await di_api.heightProperty()}");
-  print("di out widthProperty()}: ${await di_api.widthProperty()}");
-  print("di out connectedPropert: ${await di_api.connectedProperty()}");
-  print("di out isaudiopassthrou: ${await di_api.isaudiopassthroughProperty()}");
-  print("di out freegpuramProper: ${await di_api.freegpuramProperty()}");
-  print("di out totalgpuramPrope: ${await di_api.totalgpuramProperty()}");
-
-
 
   ds_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});
   cc_api.stream.listen((event) {print ('event: ${event.runtimeType} ${event}');});

@@ -36,23 +36,8 @@ cp -r ./package-files/jsons  $outdir/test/
 
 RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
 
-#API_FILES="\
-#$RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
-#$RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
-#$RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
-#$RDKSERVICES_ROOT/XCast/XCast.json \
-#"
-
-#API_FILES="\
-#$RDKSERVICES_ROOT/ActivityMonitor/ActivityMonitor.json \
-#$RDKSERVICES_ROOT/PlayerInfo/PlayerInfo.json \
-#$RDKSERVICES_ROOT/SecurityAgent/SecurityAgent.json \
-#$RDKSERVICES_ROOT/XCast/XCast.json \
-#"
-
 API_FILES="\
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
-$RDKSERVICES_ROOT/DisplayInfo/DisplayInfo.json \
 $RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
 $RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
 "
@@ -112,9 +97,7 @@ for f in `find ./test/jsons -name "*success_out.json"`; do
   cp $f $json
   sed -i 's/"success":true/"success":false/g' $json
 done
-for f in `find ./test -name "*test.dart"`; do
-  dart test --chain-stack-traces $f
-done
+dart test --chain-stack-traces ./test/*_test.dart
 
 popd
 

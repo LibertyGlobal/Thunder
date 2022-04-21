@@ -16,5 +16,5 @@ The `gen.sh script` generates tests based on mocks.
 The mocks are using real jsons from communication with CPE.
 You can grab the jsons using command:
 CPE_HOST=[Your CPE IP] dart test --chain-stack-traces ./test/tool/*
-To run the test please execute:
-dart test --chain-stack-traces ./test/[Test name]
+To run the tests please execute:
+dart test --chain-stack-traces ./test/*_test.dart
