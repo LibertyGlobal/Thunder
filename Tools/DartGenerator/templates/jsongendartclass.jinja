@@ -57,7 +57,7 @@ void main() async {
       peer.listen();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
-      expect(await () async => api.{{property.name}}Property(), returnsNormally);
+      api.{{property.name}}Property().then(expectAsync1((value) {}));
     });
   });
 {% endfor %}
@@ -77,13 +77,12 @@ void main() async {
       peer.listen();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
-
-      expect(await () async => api.{{method.name}}(
+      api.{{method.name}}(
 {% for a in method.arguments -%}
-          {{a.name}}: argsInDecoded['{{a.name}}']
+          {{a.name}}: {{a.type.instanceResultCreationCode(result='argsInDecoded[\'' + a.name + '\']', fromJson=False)}}
           {{ ", " if not loop.last else "" }}
 {% endfor %}
-        ), returnsNormally);
+        ).then(expectAsync1((value) {}));
     });
   });
 {% endfor %}
@@ -94,6 +93,8 @@ group('{{api.classname}} notifications', () {
     test('{{e.name}} notification', () async {
 {% if e.arguments[0].type.properties | length > 0 -%}
 {% endif -%}
+      var done = false;
+      var subscription;
       final socket = WebSocketChannel.connect( Uri.parse('ws://${CpePlatform.host}:9998/jsonrpc'));
       final stream = socket.stream.map((s) { 
         final argsDecoded = json.decode(s);
@@ -102,6 +103,9 @@ group('{{api.classname}} notifications', () {
           final eventName = event.substring(event.indexOf('.') + 1);
           final outFile = new File('test/jsons/{{api.classname}}_${eventName}_success_out.json');
           outFile.writeAsStringSync(s);
+          if( eventName == '{{e.name}}' ) {
+            done = true;
+          }
         }
         return s; 
       });
@@ -110,11 +114,13 @@ group('{{api.classname}} notifications', () {
       peer.listen();
       final api = new {{api.classname}}.test(peer);
       api.verbose = true;
-
-      api.stream.listen(
-          expectAsync1((value) {
-              expect(value, anything);
-        })
+      subscription = api.stream.listen(expectAsyncUntil1((value) {
+            expect(value, anything);
+          }, () {
+            if( done == true ) {
+              subscription.cancel();
+            }
+            return done; })
       );
     });
 {%- endfor %}
