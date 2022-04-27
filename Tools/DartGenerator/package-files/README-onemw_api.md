@@ -1,5 +1,5 @@
 ## onemw-api
-This package provides bindings for thunder/rdkservices API. The classes within the package are automatically generated
+This package provides bindings for JSONRPC thunder/rdkservices API. The classes within the package are automatically generated
 from the API definition files.
 
 ## Main classes
@@ -22,6 +22,9 @@ Each API class provides a `stream` which allows to listen for API specific event
 
 The list of events emitted by each API class is provided in the documentation of the class.
 
+Each API class defines its own base event, the API specific events inherit from this class. Events are classes generated
+by [freezed](https://pub.dev/packages/freezed) module, meaning they have all freeze-generated convenience methods (e.g. `map`, `when`, `maybeMap`, `maybeWhen`).
+
 
 ## Debugging
 There is a verbose flag to enable debug info from API class. Error reports shall include verbose logs.
@@ -29,9 +32,6 @@ There is a verbose flag to enable debug info from API class. Error reports shall
   var api = DisplaySettings();
   api.verbose = True;
 ```
-
-Each API class defines its own base event, the API specific events inherit from this class. Events are classes generated
-by [freezed](https://pub.dev/packages/freezed) module, meaning they have all freeze-generated convenience methods (e.g. `map`, `when`, `maybeMap`, `maybeWhen`).
 
 ## Environment
 The library respects the `CPE_HOST` environment variable, which may contain the IP address of CPE device. This allows to
