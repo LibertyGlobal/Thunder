@@ -35,8 +35,7 @@ cp ./package-files/README-onemw_api.md    $outdir/README.md
 cp ./package-files/cpe_client_factory.dart  $outdir/lib/src/
 cp -r ./package-files/jsons  $outdir/test/
 
-#RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
-RDKSERVICES_ROOT=/home/smiasojed/Development/oe-builds/apollo/onemw/onemw-src/rdkservices/
+RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
 
 API_FILES="\
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
