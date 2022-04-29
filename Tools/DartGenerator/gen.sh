@@ -28,13 +28,15 @@ lib_main_file=$outdir/lib/onemw_rdkservices_api.dart
 mkdir -p $outdir/lib/src
 mkdir -p $outdir/test/jsons/
 mkdir -p $outdir/test/tool/
+mkdir -p $outdir/test/cpe/
 
 cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml 
 cp ./package-files/README-onemw_api.md    $outdir/README.md 
 cp ./package-files/cpe_client_factory.dart  $outdir/lib/src/
 cp -r ./package-files/jsons  $outdir/test/
 
-RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
+#RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
+RDKSERVICES_ROOT=/home/smiasojed/Development/oe-builds/apollo/onemw/onemw-src/rdkservices/
 
 API_FILES="\
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
@@ -51,12 +53,15 @@ for i in $API_FILES; do
     dartfilepath=$outdir/lib/src/${dartfilename}
     testdartfilename=${filename}_test.dart
     testdartfilepath=$outdir/test/${testdartfilename}
-    genjsondartfilename=${filename}_genjson.dart
+    genjsondartfilename=${filename}_gen_json.dart
     genjsondartfilepath=$outdir/test/tool/${genjsondartfilename}
-    python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath}
+    cpetestdartfilename=${filename}_cpe_test.dart
+    cpetestdartfilepath=$outdir/test/cpe/${cpetestdartfilename}
+    python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath} -c ${cpetestdartfilepath}
     dart format -l 120 ${dartfilepath}
     dart format -l 120 ${testdartfilepath}
     dart format -l 120 ${genjsondartfilepath}
+    dart format -l 120 ${cpetestdartfilepath}
   else
     echo "$i does not exists..."
   fi
@@ -84,14 +89,6 @@ if [ -x $HOME/.pub-cache/bin/dartdoc ]; then
   $HOME/.pub-cache/bin/dartdoc
 fi
 
-if [ -z ${CPE_HOST+x} ]; then
-  echo "CPE_HOST not set, skipping jsons for tests generation"
-else
-  for f in `find ./test/tool -name "*.dart"`; do
-    CPE_HOST=$CPE_HOST dart test --chain-stack-traces $f
-  done
-fi
-
 for f in `find ./test/jsons -name "*success_out.json"`; do
   json=`echo $f | sed 's/success/failure/'`
   cp $f $json
@@ -106,4 +103,3 @@ pushd sample-app/
 dart pub get
 dart main.dart
 popd
-

@@ -350,6 +350,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('-i','--in', help="file to read json from", action="store", dest='in_file',  default='json-defs/DisplayInfo.json', type=str)
     arg_parser.add_argument('-o','--out', help="file to write generated dart code to", action="store", dest='out_file',  default=None, type=str)
     arg_parser.add_argument('-t','--tests', help="file to write generated dart code for tests to", action="store", dest='test_out_file',  default=None, type=str)
+    arg_parser.add_argument('-c','--cpetests', help="file to write generated dart code for tests to", action="store", dest='cpe_test_out_file',  default=None, type=str)
     arg_parser.add_argument('-j','--json', help="file to write dart code for json generation to", action="store", dest='jsongen_out_file',  default=None, type=str)
     arg_parser.add_argument('-x', help="do not generate code", action="store_true", dest='skip_generation',  default=False)
     arg_parser.add_argument('-v', help="show ast items", action="store_true", dest='show_ast',  default=False)
@@ -379,6 +380,13 @@ if __name__ == '__main__':
         if not program_options.skip_generation:
             apiclass.generateCode(testfilename, testoutfile, 'testdartclass.jinja', program_options.show_ast)
         testoutfile.close()
+
+    if program_options.cpe_test_out_file:
+        cpetestoutfile = open(program_options.cpe_test_out_file,"w+")
+        cpetestfilename = program_options.cpe_test_out_file.split('/')[-1].split('.')[0]
+        if not program_options.skip_generation:
+            apiclass.generateCode(cpetestfilename, cpetestoutfile, 'cpetestdartclass.jinja', program_options.show_ast)
+        cpetestoutfile.close()
 
     if program_options.jsongen_out_file:
         jsongenoutfile = open(program_options.jsongen_out_file,"w+")

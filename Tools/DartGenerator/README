@@ -18,3 +18,5 @@ You can grab the jsons using command:
 CPE_HOST=[Your CPE IP] dart test --chain-stack-traces ./test/tool/*
 To run the tests please execute:
 dart test --chain-stack-traces ./test/*_test.dart
+To run the tests on CPE please execute:
+CPE_HOST=[Your CPE IP] dart test --chain-stack-traces ./test/cpe/*
