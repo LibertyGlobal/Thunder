@@ -1,1 +1,1 @@
-{"jsonrpc":"2.0","id":0,"result":{"preferredOutputColorSpaces":[],"success":true}}
+{"jsonrpc":"2.0","id":0,"result":{"preferredOutputColorSpaces":["BT2020_NCL"],"success":true}}
