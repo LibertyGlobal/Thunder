@@ -7,11 +7,6 @@ Following API classes are the entry points for using the OneMW API:
 - [DisplaySettings]
 - [HdmiCec]
 - [HdcpProfile]
-- [DisplayInfo]
-- [ActivityMonitor]
-- [PlayerInfo]
-- [SecurityAgent]
-- [XCast]
 
 ## Eventing
 Each API class provides a `stream` which allows to listen for API specific events.
@@ -65,11 +60,13 @@ The best effort was made to document the dart classes. The original API definiti
  * [DisplaySettings.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiDisplaySettings/LgiDisplaySettings.json)
  * [LgiHdmiCec.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdmiCec/LgiHdmiCec.json)
  * [LgiHdcpProfile.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdcpProfile/LgiHdcpProfile.json)
- * [DisplayInfo.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/DisplayInfo/DisplayInfo.json)
- * [ActivityMonitor.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/ActivityMonitor/ActivityMonitor.json)
- * [PlayerInfo.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/PlayerInfo/PlayerInfo.json)
- * [SecurityAgent.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/SecurityAgent/SecurityAgent.json)
- * [XCast.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/XCast/XCast.json)
 
-
-
+## Tests
+There are 2 types of tests: mocks and CPE based.
+The mocks are using real jsons from communication with CPE.
+Jsons can be grabbed using command:
+CPE_HOST=[Your CPE IP] dart test --chain-stack-traces ./test/tool/*
+To run the tests please execute:
+dart test --chain-stack-traces ./test/*_test.dart
+To run the tests on CPE please execute:
+CPE_HOST=[Your CPE IP] dart test --chain-stack-traces ./test/cpe/*
