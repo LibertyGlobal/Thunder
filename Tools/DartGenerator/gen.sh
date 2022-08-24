@@ -30,10 +30,12 @@ mkdir -p $outdir/test/jsons/
 mkdir -p $outdir/test/tool/
 mkdir -p $outdir/test/cpe/
 
-cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml 
-cp ./package-files/README-onemw_api.md    $outdir/README.md 
+cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml
+cp ./package-files/README-onemw_api.md    $outdir/README.md
+cp ./package-files/LICENSE.txt $outdir/LICENSE.txt
 cp ./package-files/cpe_client_factory.dart  $outdir/lib/src/
 cp -r ./package-files/jsons  $outdir/test/
+cp -r ./package-files/example $outdir/example
 
 RDKSERVICES_ROOT=/rdk/flutter/api-gen/api-gen-upstream/rdkservices/
 
@@ -41,9 +43,13 @@ API_FILES="\
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
 $RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
 $RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
+$RDKSERVICES_ROOT/XCast/XCast.json \
 "
 
-for i in $API_FILES; do 
+# $RDKSERVICES_ROOT/WebKitBrowser/WebKitBrowser.json - pointed in latest design page - generation failed, generator issue
+# $RDKSERVICES_ROOT/SystemAudioPlayer/SystemAudioPlayer.json - pointed in latest design page, not yet finally deployed, generator issue
+
+for i in $API_FILES; do
   echo $i
   if [ -f $i ]; then
     basename=`basename -s .json $i`
@@ -63,6 +69,7 @@ for i in $API_FILES; do
     dart format -l 120 ${cpetestdartfilepath}
   else
     echo "$i does not exists..."
+    exit -1
   fi
 done
 
@@ -93,12 +100,12 @@ for f in `find ./test/jsons -name "*success_out.json"`; do
   cp $f $json
   sed -i 's/"success":true/"success":false/g' $json
 done
-dart test --chain-stack-traces ./test/*_test.dart
-
+dart test --chain-stack-traces ./test/lgi_*_test.dart
+#dart test --chain-stack-traces ./test/x_cast_test.dart # xcast tests not yet provided
 popd
 
 echo ">>>>> running sample app"
-pushd sample-app/
+pushd $outdir/example
 dart pub get
 dart main.dart
 popd

@@ -1,0 +1,9 @@
+name: thunder_example
+
+environment:
+  sdk: ">=2.17.6 <3.0.0"
+
+dependencies:
+  onemw_rdkservices_api:
+    path: ../
+

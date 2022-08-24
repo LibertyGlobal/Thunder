@@ -7,6 +7,7 @@ Following API classes are the entry points for using the OneMW API:
 - [DisplaySettings]
 - [HdmiCec]
 - [HdcpProfile]
+- [XCast]
 
 ## Eventing
 Each API class provides a `stream` which allows to listen for API specific events.
@@ -57,9 +58,10 @@ void main() async {
 
 ## Definition of the API
 The best effort was made to document the dart classes. The original API definition in json files is provided here for reference:
- * [DisplaySettings.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiDisplaySettings/LgiDisplaySettings.json)
- * [LgiHdmiCec.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdmiCec/LgiHdmiCec.json)
- * [LgiHdcpProfile.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20210920/LgiHdcpProfile/LgiHdcpProfile.json)
+ * [DisplaySettings.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20220329/LgiDisplaySettings/LgiDisplaySettings.json)
+ * [LgiHdmiCec.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20220329/LgiHdmiCec/LgiHdmiCec.json)
+ * [LgiHdcpProfile.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20220329/LgiHdcpProfile/LgiHdcpProfile.json)
+ * [XCast.json](https://github.com/LibertyGlobal/rdkservices/blob/lgi-main-20220329/XCast/XCast.json)
 
 ## Tests
 There are 2 types of tests: mocks and CPE based.
