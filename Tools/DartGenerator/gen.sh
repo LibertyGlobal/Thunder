@@ -32,7 +32,8 @@ mkdir -p $outdir/test/cpe/
 
 cp ./package-files/pubspec-onemw_api.yaml $outdir/pubspec.yaml
 cp ./package-files/README-onemw_api.md    $outdir/README.md
-cp ./package-files/LICENSE.txt $outdir/LICENSE.txt
+cp ./package-files/LICENSE $outdir/LICENSE
+cp ./package-files/CHANGELOG.md $outdir/CHANGELOG.md
 cp ./package-files/cpe_client_factory.dart  $outdir/lib/src/
 cp -r ./package-files/jsons  $outdir/test/
 cp -r ./package-files/example $outdir/example
