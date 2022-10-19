@@ -22,8 +22,13 @@ function CamelCase_to_snake_case() {
   python3 -c 'import re,sys; print(re.sub(r"(?<!^)(?=[A-Z])", "_", sys.argv[1]).lower())' $1
 }
 
-outdir=./onemw-rdkservices-api/
+outdir=./onemw_rdkservices_api/
 lib_main_file=$outdir/lib/onemw_rdkservices_api.dart
+
+if [ -d $outdir ]
+then
+  rm -rf $outdir
+fi
 
 mkdir -p $outdir/lib/src
 mkdir -p $outdir/test/jsons/
@@ -44,7 +49,6 @@ API_FILES="\
 $RDKSERVICES_ROOT/LgiHdcpProfile/LgiHdcpProfile.json \
 $RDKSERVICES_ROOT/LgiHdmiCec/LgiHdmiCec.json \
 $RDKSERVICES_ROOT/LgiDisplaySettings/LgiDisplaySettings.json \
-$RDKSERVICES_ROOT/XCast/XCast.json \
 "
 
 # $RDKSERVICES_ROOT/WebKitBrowser/WebKitBrowser.json - pointed in latest design page - generation failed, generator issue
@@ -61,13 +65,16 @@ for i in $API_FILES; do
     testdartfilepath=$outdir/test/${testdartfilename}
     genjsondartfilename=${filename}_gen_json.dart
     genjsondartfilepath=$outdir/test/tool/${genjsondartfilename}
-    cpetestdartfilename=${filename}_cpe_test.dart
-    cpetestdartfilepath=$outdir/test/cpe/${cpetestdartfilename}
-    python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath} -c ${cpetestdartfilepath}
+    #automatic CPE tests generation removed - they are not working yet, and could be started by flutter test command on CI/CD,
+    #moreover require CPEs to run    
+    #cpetestdartfilename=${filename}_cpe_test.dart
+    #cpetestdartfilepath=$outdir/test/cpe/${cpetestdartfilename}
+    #python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath} -c ${cpetestdartfilepath}
+    python3 jsonrpc_to_dart.py -i $i -o ${dartfilepath} -t ${testdartfilepath} -j ${genjsondartfilepath}
     dart format -l 120 ${dartfilepath}
     dart format -l 120 ${testdartfilepath}
     dart format -l 120 ${genjsondartfilepath}
-    dart format -l 120 ${cpetestdartfilepath}
+    #dart format -l 120 ${cpetestdartfilepath}
   else
     echo "$i does not exists..."
     exit -1
@@ -101,8 +108,8 @@ for f in `find ./test/jsons -name "*success_out.json"`; do
   cp $f $json
   sed -i 's/"success":true/"success":false/g' $json
 done
-dart test --chain-stack-traces ./test/lgi_*_test.dart
-#dart test --chain-stack-traces ./test/x_cast_test.dart # xcast tests not yet provided
+dart test --chain-stack-traces ./test/*_test.dart
+
 popd
 
 echo ">>>>> running sample app"
