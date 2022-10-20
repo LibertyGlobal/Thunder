@@ -16,14 +16,6 @@
 // limitations under the License.
 
 import 'package:onemw_rdkservices_api/onemw_rdkservices_api.dart';
-import 'dart:io';
-import 'dart:async';
-
-int f(var x) {
-  // String x = "123";
-  return x is int ? x :  int.parse(x);
-
-}
 
 void main() async {
   var ds_api = DisplaySettings();
